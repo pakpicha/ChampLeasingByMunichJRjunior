@@ -153,7 +153,10 @@ body{
   /* ซ่อนทุกอย่างยกเว้น preview */
   body>*{display:none!important}
   #sec-preview{display:block!important}
-  .pbtns,.back-home,.schedule-toolbar{display:none!important}
+  .pbtns,.back-home,.schedule-toolbar,.font-ctrl{display:none!important}
+  .doc{min-height:auto!important;overflow:visible!important}
+  .doc-sigs{page-break-inside:avoid!important}
+  .doc-clause{page-break-inside:avoid!important}
   /* doc wrapper */
   .ui{max-width:none!important;padding:0!important;margin:0!important}
   .doc-wrap{padding:0!important;max-width:none!important;width:100%!important;margin:0!important}
@@ -500,9 +503,8 @@ body{
   position:relative;
   box-shadow:0 8px 32px rgba(15,46,33,.12),0 2px 6px rgba(15,46,33,.06);
   width:21cm;
-  height:29.7cm;
+  min-height:29.7cm;
   box-sizing:border-box;
-  overflow:hidden;
   flex-shrink:0;
 }
 
@@ -538,6 +540,8 @@ body{
   text-align:center;
   margin:8pt 0 4pt;
 }
+
+.doc .nowrap{white-space:nowrap}
 
 /* Signatures (2-column grid at bottom) */
 .doc-sigs{
@@ -967,7 +971,7 @@ function tdpSelect(did,iso){
   if(inp){inp.value=_tdpFmt(iso);inp.classList.remove('er');inp.classList.add('ok');}
   _tdpRender(did);
   tdpClose();
-  if(s.onchange)try{eval(s.onchange);}catch(e){}
+  if(s.onchange&&typeof s.onchange==='function')try{s.onchange(iso);}catch(e){console.warn(e);}
 }
 function tdpOpen(did){
   tdpClose();
@@ -1229,13 +1233,15 @@ function onLenderChange(){
 
 function addBorrower(){
   bC++;
-  document.getElementById('borrowers').appendChild(elN(personBlock('b',bC)));
-  setTimeout(()=>wirePerson('b',bC),20);
+  var idx=bC;
+  document.getElementById('borrowers').appendChild(elN(personBlock('b',idx)));
+  wirePerson('b',idx);
 }
 function addGuarantor(){
   gC++;
-  document.getElementById('guarantors').appendChild(elN(personBlock('g',gC)));
-  setTimeout(()=>wirePerson('g',gC),20);
+  var idx=gC;
+  document.getElementById('guarantors').appendChild(elN(personBlock('g',idx)));
+  wirePerson('g',idx);
 }
 
 function wirePerson(p,i){
@@ -1499,11 +1505,16 @@ function fmtCol(c){
 
 function fmtPersonList(list){
   if(list.length===0)return '..........';
-  const names=list.map(p=>`${p.title||''} ${p.name||'..........'}${p.idcard?' (เลขประจำตัวประชาชน '+p.idcard+')':''}`).join(', ');
+  // ห่อชื่อด้วย nowrap span ไม่ให้ชื่อฉีกข้ามบรรทัด
+  const names=list.map(function(p){
+    var nm=(p.title||'')+' '+(p.name||'..........');
+    var idc=p.idcard?' <span class="nowrap">(เลขประจำตัวประชาชน '+p.idcard+')</span>':'';
+    return '<span class="nowrap">'+nm+'</span>'+idc;
+  }).join(', ');
   const ages=list.map(p=>p.age||'..').join(', ');
-  const addrs=list.map(p=>p.addr||'..........').join(', ');
+  const addrs=list.map(p=>'<span class="nowrap">'+(p.addr||'..........')+'</span>').join(', ');
   const t=list[0].tambon||'..........',a=list[0].amphoe||'..........',pv=list[0].province||'..........';
-  return `${names} อายุ ${ages} ปี อยู่บ้านเลขที่ ${addrs} ตำบล${t} อำเภอ${a} จังหวัด${pv}`;
+  return `${names} อายุ ${ages} ปี อยู่บ้านเลขที่ ${addrs} <span class="nowrap">ตำบล${t}</span> <span class="nowrap">อำเภอ${a}</span> <span class="nowrap">จังหวัด${pv}</span>`;
 }
 
 // ─── ตารางผ่อนชำระ ───
@@ -1796,7 +1807,7 @@ function fitContentToA4(){
   }
   _autoRatio=(lo+hi)/2*0.985;
   if(_autoRatio>2.3) _autoRatio=2.3;
-  if(_autoRatio<0.3) _autoRatio=0.3;
+  if(_autoRatio<0.6) _autoRatio=0.6;  // floor 60% — เกินก็แตกหน้าได้
 
   // load saved user multiplier
   try{
@@ -1832,7 +1843,7 @@ function generateContract(){
   const dp=fmtDateParts(getTDPVal('contract_date'));
   const lender=gv('lender_dir');
   const borrowers=readPersons('b');
-  const guarantors=gc('has_guarantor')?readPersons('g'):[];
+  const guarantors=readPersons('g');
   const collaterals=readCollaterals();
   const amtRaw=gv('amount').replace(/,/g,'');
   const amount=amtRaw?Number(amtRaw).toLocaleString('en-US'):'..........';
