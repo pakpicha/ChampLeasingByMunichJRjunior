@@ -1985,9 +1985,10 @@ function resetAll(){
 
 // ─── Auto-save / Restore ───
 function autoSave(){
-  const data={fields:{},bC,gC,cC,colTypes:{}};
-  // เก็บเฉพาะ visible inputs (tdpi_* และ field อื่น) + hidden TDP
+  const data={fields:{},bC,gC,cC,colTypes:{},lpRows:[]};
+  // เก็บ visible inputs ทั่วไป — แต่ไม่เก็บ lp_* (มี dedicated section)
   document.querySelectorAll('input[id],select[id],textarea[id]').forEach(e=>{
+    if(/^lp_(type|amt|detail)_/.test(e.id))return; // skip — saved in lpRows
     if(e.type==='checkbox')data.fields[e.id]=e.checked;
     else data.fields[e.id]=e.value;
   });
@@ -1995,6 +1996,15 @@ function autoSave(){
     const i=node.id.split('-')[1];
     const te=document.getElementById(`c${i}_type`);
     if(te)data.colTypes[i]=te.value;
+  });
+  // เก็บ loan_pay rows เป็น array — รักษาลำดับ + ค่าจริง (ไม่ผูกกับ id)
+  document.querySelectorAll('#loan_pay_rows .loan-pay-row').forEach(el=>{
+    const i=el.id.split('-')[1];
+    data.lpRows.push({
+      type:gv('lp_type_'+i)||'cash',
+      amt:gv('lp_amt_'+i)||'',
+      detail:gv('lp_detail_'+i)||''
+    });
   });
   try{localStorage.setItem('loanContractData',JSON.stringify(data))}catch(e){}
 }
@@ -2035,6 +2045,24 @@ function autoRestore(){
       try{tdpInit('due_date',function(){updateSchedule();});_tdpWireEvents('due_date');}catch(e){}
       if(bC===0)addBorrower();
       setTimeout(updateSchedule,80);
+      // restore loan_pay rows (หลังจาก amount field ถูก restore แล้ว)
+      const lpData=data.lpRows||[];
+      const lpWrap=document.getElementById('loan_pay_rows');
+      if(lpWrap && lpData.length>0){
+        lpWrap.innerHTML='';
+        _loanPayCounter=0;
+        lpData.forEach(function(rowData){
+          addLoanPay();
+          const newId=_loanPayCounter;
+          const tSel=document.getElementById('lp_type_'+newId);
+          const aInp=document.getElementById('lp_amt_'+newId);
+          const dInp=document.getElementById('lp_detail_'+newId);
+          if(tSel)tSel.value=rowData.type;
+          if(aInp)aInp.value=rowData.amt;
+          if(dInp)dInp.value=rowData.detail;
+          onLoanPayTypeChange(newId);
+        });
+      }
     },120);
   }catch(e){if(bC===0)addBorrower()}
 }
