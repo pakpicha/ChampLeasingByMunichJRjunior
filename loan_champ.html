@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>สัญญากู้เงิน — ร้านแชมป์ลิสซิ่ง</title>
+<title>สัญญากู้เงิน — บริษัท โชคชัย เงินด่วน จำกัด</title>
 <meta name="theme-color" content="#1a3a2a">
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
@@ -323,7 +323,7 @@ body{
 
 /* Checkbox row (.chips) */
 .chips{margin-bottom:10px}
-.chips label, label.chips{
+.chips label{
   display:inline-flex;align-items:center;gap:8px;
   padding:9px 14px;
   background:var(--field-bg);
@@ -331,18 +331,14 @@ body{
   border-radius:10px;
   font-size:14px;font-weight:500;
   cursor:pointer;color:var(--ink);
-  transition:background .15s,border-color .15s,color .15s,box-shadow .15s;
+  transition:background .15s,border-color .15s;
 }
-.chips label:has(input:checked), label.chips:has(input:checked){
-  background:var(--primary);
+.chips label:has(input:checked){
+  background:var(--primary-soft);
   border-color:var(--primary);
-  color:#fff;font-weight:700;
-  box-shadow:0 2px 8px rgba(15,46,33,.25);
+  color:var(--primary);font-weight:600;
 }
-.chips label:has(input:checked)::before, label.chips:has(input:checked)::before{
-  content:"✓ ";font-weight:900;font-size:15px;
-}
-.chips input[type="checkbox"], label.chips input[type="checkbox"]{width:16px;height:16px;accent-color:#fff}
+.chips input[type="checkbox"]{width:16px;height:16px;accent-color:var(--primary)}
 
 /* Preview / button row */
 .pbtns{display:flex;gap:10px;margin-top:8px;flex-wrap:wrap}
@@ -533,17 +529,15 @@ body{
   text-indent:1cm;
   margin-bottom:2pt;
   text-align:justify;
-  word-break:keep-all;
-  line-break:strict;
-  hyphens:none;
+  overflow-wrap:anywhere;
+  word-break:break-all;
 }
 .doc-clause{
   text-indent:1cm;
   margin-bottom:2pt;
   text-align:justify;
-  word-break:keep-all;
-  line-break:strict;
-  hyphens:none;
+  overflow-wrap:anywhere;
+  word-break:break-all;
 }
 .doc-clause b{font-weight:bold;font-size:1.25em}
 .doc-center{
@@ -652,6 +646,7 @@ body{
 <div class="section active" id="sec-form">
 <div class="ui">
   <div class="ui-head">
+    <a href="index.html" style="display:inline-flex;align-items:center;gap:6px;background:#fff;color:#1a4d3a;border:1px solid #ccc;padding:8px 14px;border-radius:10px;font-size:13px;font-weight:600;text-decoration:none;margin-bottom:12px;font-family:inherit">← กลับหน้าหลัก</a>
     <h1>📄 หนังสือสัญญากู้เงินตามกฎหมาย</h1>
     <p>ร้านแชมป์ลิสซิ่ง</p>
   </div>
@@ -773,6 +768,25 @@ body{
     </div>
   </div>
 
+  <div class="card">
+    <div class="ct"><span class="lhs"><span class="n">8</span> ใบสำคัญจ่าย (ออกพร้อมสัญญา)</span></div>
+    <div class="fg" style="max-width:200px"><label>เลขที่บิลของวัน</label><input type="text" id="gv_bill_seq" value="01" placeholder="01"></div>
+    <label style="font-weight:600;font-size:13px;color:var(--primary);margin-top:6px;display:block">รายการจ่าย (แบ่งจ่ายหลายวิธีได้)</label>
+    <div id="loan_pay_rows"></div>
+    <button type="button" class="add-btn" onclick="addLoanPay()" style="margin-top:6px">+ เพิ่มวิธีจ่าย</button>
+    <div class="hint">ผลรวมจะถูกแสดงในใบสำคัญจ่าย — ดึงผู้ให้กู้และผู้กู้จากสัญญาด้านบนอัตโนมัติ</div>
+  </div>
+
+  <style>
+    .loan-pay-row{border:1px solid var(--line);border-radius:8px;padding:10px;margin-top:8px;background:rgba(0,0,0,0.02)}
+    .loan-pay-row .lp-head{display:flex;gap:8px;margin-bottom:6px;align-items:center}
+    .loan-pay-row .lp-head select{flex:1;padding:8px 11px;font-size:14px;border:1px solid var(--line);border-radius:8px;background:#fff;font-family:inherit}
+    .loan-pay-row .lp-head input{width:140px;padding:8px 11px;font-size:14px;border:1px solid var(--line);border-radius:8px;text-align:right;font-family:inherit}
+    .loan-pay-row .lp-head button{background:#fee;color:#c00;border:1px solid #fcc;padding:8px 12px;border-radius:8px;cursor:pointer;font-size:13px}
+    .loan-pay-row .lp-detail{width:100%;padding:8px 11px;font-size:14px;border:1px solid var(--line);border-radius:8px;font-family:inherit;background:#fff}
+    .loan-pay-row .lp-detail.hidden{display:none}
+  </style>
+
   <button class="gen-btn" onclick="generateContract()">⚡ สร้างเอกสารสัญญา</button>
 </div>
 </div>
@@ -781,7 +795,8 @@ body{
   <div class="pbtns">
     <button class="pbk" onclick="backToForm()">← แก้ไข</button>
     <button class="pbk" onclick="resetAll()">🔄 ล้าง</button>
-    <button class="ppr" onclick="printContract()">🖨️ พิมพ์ / PDF</button>
+    <button class="ppr" onclick="printContract()">🖨️ พิมพ์สัญญา</button>
+    <button class="ppr" onclick="printVoucher()" style="background:linear-gradient(135deg,#8b4513,#a0552a)">🧾 พิมพ์ใบสำคัญจ่าย</button>
   </div>
   <div class="font-ctrl">
     <button onclick="adjustFont(-1)" title="ลดขนาด">A−</button>
@@ -790,7 +805,7 @@ body{
     <button onclick="adjustFont(0)" title="คืนค่าอัตโนมัติ" style="margin-left:6px;font-size:11px">⟲ อัตโนมัติ</button>
   </div>
   <div class="doc-wrap">
-    <div class="doc" id="doc-preview" lang="th">
+    <div class="doc" id="doc-preview">
       <div class="placeholder">กรอกข้อมูลแล้วกด <strong>"สร้างเอกสารสัญญา"</strong></div>
     </div>
   </div>
@@ -1232,6 +1247,24 @@ var LENDER_PEOPLE={
   "นางสาวภัคฐ์พิชา จรัสบวรพันธ์": "256/135 หมู่ที่ 12 ตำบลโชคชัย อำเภอโชคชัย จังหวัดนครราชสีมา"
 };
 
+// ข้อมูลเลขประจำตัวประชาชนของผู้ให้กู้สำหรับใบสำคัญจ่าย
+var LENDER_IDS={
+  "นายกันตพัฒน์ จรัสบวรพันธ์":   "5-3104-90020-67-2",
+  "นางชญาน์นัทช์ จรัสบวรพันธ์":  "3-1002-01943-52-6",
+  "นายชุณนเกียรติ จรัสบวรพันธ์":  "1-3099-01159-18-6",
+  "นายฐานวัฒน์ จรัสบวรพันธ์":    "1-3099-02455-25-1",
+  "นางสาวภัคฐ์พิชา จรัสบวรพันธ์": "1-3099-02772-91-4"
+};
+
+var PAY_TYPE_LABELS={
+  "cash":"เงินสด",
+  "draft":"ดราฟท์",
+  "transfer":"เงินโอน",
+  "pn":"ตั๋วสัญญาใช้เงิน",
+  "bankdraft":"ดราฟต์ธนาคาร",
+  "check":"เช็ค"
+};
+
 function onLenderChange(){
   var sel=document.getElementById('lender_dir').value;
   var placeEl=document.getElementById('place');
@@ -1504,7 +1537,7 @@ function fmtCol(c){
   const lbl={land:'โฉนดที่ดิน',nsk:'น.ส.3 ก.',car:'รถยนต์',motorcycle:'รถจักรยานยนต์',gold:'ทองคำ/เครื่องประดับ',bank:'บัญชีเงินฝาก',other:'ทรัพย์สิน'}[c.type];
   if(c.type==='land'||c.type==='nsk'){
     let s=`${lbl} เลขที่ ${c.doc||'..........'} เลขที่ดิน ${c.land||'..........'} ตำบล ${c.tambon||'..........'} อำเภอ ${c.amphoe||'..........'} จังหวัด ${c.province||'..........'}`;
-    if(c.building)s+=' พร้อมสิ่งปลูกสร้างที่มีอยู่และที่จะเกิดขึ้นในอนาคต';
+    if(c.building)s+=' พร้อมสิ่งปลูกสร้างที่มีอยู่และเกิดขึ้นในอนาคต';
     return s;
   }
   if(c.type==='car'||c.type==='motorcycle')return `${lbl} ทะเบียน ${c.plate||'..........'} ยี่ห้อ ${c.brand||'..........'} รุ่น ${c.model||'..........'} สี ${c.color||'..........'} เลขตัวถัง ${c.chassis||'..........'} เลขเครื่อง ${c.engine||'..........'}`;
@@ -1952,9 +1985,10 @@ function resetAll(){
 
 // ─── Auto-save / Restore ───
 function autoSave(){
-  const data={fields:{},bC,gC,cC,colTypes:{}};
-  // เก็บเฉพาะ visible inputs (tdpi_* และ field อื่น) + hidden TDP
+  const data={fields:{},bC,gC,cC,colTypes:{},lpRows:[]};
+  // เก็บ visible inputs ทั่วไป — แต่ไม่เก็บ lp_* (มี dedicated section)
   document.querySelectorAll('input[id],select[id],textarea[id]').forEach(e=>{
+    if(/^lp_(type|amt|detail)_/.test(e.id))return; // skip — saved in lpRows
     if(e.type==='checkbox')data.fields[e.id]=e.checked;
     else data.fields[e.id]=e.value;
   });
@@ -1962,6 +1996,15 @@ function autoSave(){
     const i=node.id.split('-')[1];
     const te=document.getElementById(`c${i}_type`);
     if(te)data.colTypes[i]=te.value;
+  });
+  // เก็บ loan_pay rows เป็น array — รักษาลำดับ + ค่าจริง (ไม่ผูกกับ id)
+  document.querySelectorAll('#loan_pay_rows .loan-pay-row').forEach(el=>{
+    const i=el.id.split('-')[1];
+    data.lpRows.push({
+      type:gv('lp_type_'+i)||'cash',
+      amt:gv('lp_amt_'+i)||'',
+      detail:gv('lp_detail_'+i)||''
+    });
   });
   try{localStorage.setItem('loanContractData',JSON.stringify(data))}catch(e){}
 }
@@ -2002,6 +2045,24 @@ function autoRestore(){
       try{tdpInit('due_date',function(){updateSchedule();});_tdpWireEvents('due_date');}catch(e){}
       if(bC===0)addBorrower();
       setTimeout(updateSchedule,80);
+      // restore loan_pay rows (หลังจาก amount field ถูก restore แล้ว)
+      const lpData=data.lpRows||[];
+      const lpWrap=document.getElementById('loan_pay_rows');
+      if(lpWrap && lpData.length>0){
+        lpWrap.innerHTML='';
+        _loanPayCounter=0;
+        lpData.forEach(function(rowData){
+          addLoanPay();
+          const newId=_loanPayCounter;
+          const tSel=document.getElementById('lp_type_'+newId);
+          const aInp=document.getElementById('lp_amt_'+newId);
+          const dInp=document.getElementById('lp_detail_'+newId);
+          if(tSel)tSel.value=rowData.type;
+          if(aInp)aInp.value=rowData.amt;
+          if(dInp)dInp.value=rowData.detail;
+          onLoanPayTypeChange(newId);
+        });
+      }
     },120);
   }catch(e){if(bC===0)addBorrower()}
 }
@@ -2015,6 +2076,282 @@ window.addEventListener('DOMContentLoaded',function(){
 });
 setInterval(autoSave,2500);
 window.addEventListener('beforeunload',autoSave);
+</script>
+
+<!-- voucher preview hidden div -->
+<div id="gv-preview-loan" style="display:none"></div>
+
+<script>
+// ─── ฟังก์ชันช่วยเหลือสำหรับใบสำคัญจ่าย ───
+function _vToBaht(n){
+  n=parseInt(String(n).replace(/[,\s]/g,''));
+  if(isNaN(n)||n===0)return '';
+  var u=['','หนึ่ง','สอง','สาม','สี่','ห้า','หก','เจ็ด','แปด','เก้า'];
+  var p=['','สิบ','ร้อย','พัน','หมื่น','แสน','ล้าน'];
+  function toText(n){
+    if(n===0)return '';
+    if(n>=1000000)return toText(Math.floor(n/1000000))+'ล้าน'+toText(n%1000000);
+    var r='',d=String(n).split('');
+    d.reverse();
+    for(var i=0;i<d.length;i++){
+      if(d[i]==='0')continue;
+      r=u[parseInt(d[i])]+p[i]+r;
+      if(i===1&&d[i]==='1')r='สิบ'+r.slice(2);
+      if(i===1&&d[i]==='2')r='ยี่สิบ'+r.slice(4);
+    }
+    return r;
+  }
+  return toText(n)+'บาทถ้วน';
+}
+
+function _vShortDate(dateStr){
+  if(!dateStr)return '......';
+  var d=0,mIdx=0,y=0;
+  if(dateStr.indexOf('/')>-1){
+    // DD/MM/YYYY (BE)
+    var p=dateStr.split('/');
+    if(p.length!==3)return dateStr;
+    d=parseInt(p[0]); mIdx=parseInt(p[1])-1; y=parseInt(p[2]);
+  } else if(dateStr.indexOf('-')>-1){
+    // YYYY-MM-DD (ISO/CE)
+    var p=dateStr.split('-');
+    if(p.length!==3)return dateStr;
+    d=parseInt(p[2]); mIdx=parseInt(p[1])-1; y=parseInt(p[0])+543;
+  } else return dateStr;
+  var months=['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+  return d+'/'+months[mIdx]+'/'+y;
+}
+
+function _vPayerLetter(name){
+  if(!name) return 'X';
+  var n=String(name).replace(/^(นางสาว|นาย|นาง)\s*/,'').replace(/\s+/g,'');
+  if(n.indexOf('กันต')===0) return 'K';
+  if(n.indexOf('ชญา')===0) return 'C';
+  if(n.indexOf('ชุณ')===0) return 'H';
+  if(n.indexOf('ฐาน')===0) return 'T';
+  if(n.indexOf('ภัค')===0) return 'J';
+  return 'X';
+}
+
+function _vBillNo(dateStr,seq,payerName){
+  var letter=_vPayerLetter(payerName);
+  if(!dateStr)return letter+'......-'+(seq||'01');
+  // รับได้ทั้ง 2 รูปแบบ
+  var dd='00',mm='00',yy='00';
+  if(dateStr.indexOf('/')>-1){
+    // DD/MM/YYYY (BE) — จาก getTDPVal
+    var p=dateStr.split('/');
+    if(p.length===3){
+      dd=p[0].padStart(2,'0');
+      mm=p[1].padStart(2,'0');
+      yy=String(parseInt(p[2])).slice(-2);
+    }
+  } else if(dateStr.indexOf('-')>-1){
+    // YYYY-MM-DD (ISO/CE)
+    var p=dateStr.split('-');
+    if(p.length===3){
+      yy=String(parseInt(p[0])+543).slice(-2);
+      mm=p[1].padStart(2,'0');
+      dd=p[2].padStart(2,'0');
+    }
+  }
+  return letter+yy+mm+dd+'-'+(seq||'01');
+}
+
+var _LOAN_PAY_PLACEHOLDERS={
+  "cash":"(ไม่ต้องระบุ)",
+  "transfer":"ธนาคาร / เลขบัญชี / วันที่โอน",
+  "check":"ธนาคาร / เลขที่เช็ค / วันที่เช็ค",
+  "draft":"เลขที่ดราฟท์ / ธนาคาร / วันที่",
+  "bankdraft":"ธนาคาร / เลขที่ดราฟต์ / วันที่",
+  "pn":"เลขที่ / วันที่ออกตั๋ว / วันครบกำหนด"
+};
+
+var _loanPayCounter=0;
+
+function addLoanPay(){
+  _loanPayCounter++;
+  var i=_loanPayCounter;
+  var wrap=document.getElementById('loan_pay_rows');
+  if(!wrap)return;
+  // ครั้งแรก: prefill จำนวนเงินจากยอดเงินกู้
+  var defaultAmt='';
+  if(wrap.children.length===0){
+    var amtRaw=(gv('amount')||'').replace(/,/g,'');
+    if(amtRaw)defaultAmt=parseInt(amtRaw).toLocaleString('en-US');
+  }
+  var div=document.createElement('div');
+  div.id='lpay-'+i;
+  div.className='loan-pay-row';
+  div.innerHTML=
+    '<div class="lp-head">'
+    +'<select id="lp_type_'+i+'" onchange="onLoanPayTypeChange('+i+')">'
+    +'<option value="cash">เงินสด</option>'
+    +'<option value="transfer">เงินโอน</option>'
+    +'<option value="check">เช็ค</option>'
+    +'<option value="draft">ดราฟท์</option>'
+    +'<option value="bankdraft">ดราฟต์ธนาคาร</option>'
+    +'<option value="pn">ตั๋วสัญญาใช้เงิน</option>'
+    +'</select>'
+    +'<input type="text" id="lp_amt_'+i+'" placeholder="จำนวนเงิน" value="'+defaultAmt+'" oninput="onLoanPayAmtInput('+i+')">'
+    +'<button type="button" onclick="removeLoanPay('+i+')">× ลบ</button>'
+    +'</div>'
+    +'<input type="text" id="lp_detail_'+i+'" class="lp-detail hidden" placeholder="(ไม่ต้องระบุ)">';
+  wrap.appendChild(div);
+  onLoanPayTypeChange(i);
+}
+
+function removeLoanPay(i){
+  var el=document.getElementById('lpay-'+i);
+  if(el)el.remove();
+}
+
+function onLoanPayTypeChange(i){
+  var sel=document.getElementById('lp_type_'+i);
+  var det=document.getElementById('lp_detail_'+i);
+  if(!sel||!det)return;
+  var t=sel.value;
+  var ph=_LOAN_PAY_PLACEHOLDERS[t]||'';
+  det.placeholder=ph;
+  // ซ่อนช่องรายละเอียดถ้าเป็นเงินสด
+  if(t==='cash'){det.classList.add('hidden');det.value='';}
+  else det.classList.remove('hidden');
+}
+
+function onLoanPayAmtInput(i){
+  // format ตัวเลขด้วย comma
+  var inp=document.getElementById('lp_amt_'+i);
+  if(!inp)return;
+  var raw=inp.value.replace(/[^\d]/g,'');
+  if(!raw){inp.value='';return;}
+  inp.value=parseInt(raw).toLocaleString('en-US');
+}
+
+function getLoanPayRows(){
+  var rows=[];
+  document.querySelectorAll('#loan_pay_rows .loan-pay-row').forEach(function(el){
+    var i=el.id.split('-')[1];
+    var t=gv('lp_type_'+i)||'cash';
+    var amtRaw=(gv('lp_amt_'+i)||'').replace(/,/g,'');
+    var amt=parseInt(amtRaw)||0;
+    var detail=gv('lp_detail_'+i)||'';
+    if(amt>0)rows.push({type:t, label:PAY_TYPE_LABELS[t]||'เงินสด', amt:amt, detail:detail});
+  });
+  return rows;
+}
+
+function printVoucher(){
+  // ดึงข้อมูลจากสัญญา
+  var lenderName=gv('lender_dir')||'';
+  if(!lenderName){alert('กรุณาเลือกผู้ให้กู้ในสัญญาก่อน');return;}
+  var lenderAddr=LENDER_PEOPLE[lenderName]||'';
+  var lenderID=LENDER_IDS[lenderName]||'';
+  
+  var borrowers=readPersons('b');
+  if(borrowers.length===0){alert('กรุณากรอกข้อมูลผู้กู้ก่อน');return;}
+  
+  var recvNames=borrowers.map(function(b){
+    return (b.title||'')+' '+(b.name||'..........');
+  }).join(', ');
+  
+  var b0=borrowers[0];
+  var recvAddr=(b0.addr||'..........');
+  if(b0.tambon)recvAddr+=' ตำบล'+b0.tambon;
+  if(b0.amphoe)recvAddr+=' อำเภอ'+b0.amphoe;
+  if(b0.province)recvAddr+=' จังหวัด'+b0.province;
+  
+  var payRows=getLoanPayRows();
+  if(payRows.length===0){alert('กรุณาเพิ่มอย่างน้อย 1 วิธีจ่ายและกรอกจำนวนเงิน');return;}
+  
+  var totalAmt=0;
+  payRows.forEach(function(r){totalAmt+=r.amt;});
+  
+  var dateISO=getTDPVal('contract_date');
+  var seq=gv('gv_bill_seq')||'01';
+  var no=_vBillNo(dateISO,seq,lenderName);
+  
+  var CELL='padding:5pt 7pt;font-size:14pt;';
+  
+  function copy(lbl){
+    // แถวรายการจ่าย — แต่ละบรรทัดเป็นวิธีจ่าย 1 แบบ
+    var rowsHTML='';
+    payRows.forEach(function(r){
+      var labelCell='ค่ากู้ยืมเงินตามสัญญา ('+r.label+')';
+      if(r.detail){
+        labelCell+='<div style="font-size:11pt;color:#555;margin-top:1pt;font-style:italic;word-break:break-word;line-height:1.2">'+r.detail+'</div>';
+      }
+      rowsHTML+='<tr>'
+        +'<td style="border:1px solid #999;'+CELL+'vertical-align:top">'+labelCell+'</td>'
+        +'<td style="border:1px solid #999;'+CELL+'text-align:right;white-space:nowrap;width:28%;vertical-align:top">'+r.amt.toLocaleString('th-TH')+'</td>'
+        +'</tr>';
+    });
+    // pad rows
+    var pad=Math.max(0,3-payRows.length);
+    while(pad-->0){rowsHTML+='<tr><td style="border:1px solid #999;'+CELL+'height:0.8cm"></td><td style="border:1px solid #999;'+CELL+'"></td></tr>';}
+    
+    return '<div style="flex:1;min-height:0;padding:3mm 5mm;font-family:TH Sarabun New,Sarabun,Arial,sans-serif;box-sizing:border-box;display:flex;flex-direction:column;justify-content:space-between;overflow:hidden">'
+      +'<div>'
+      +'<table style="width:100%;border-collapse:collapse;margin-bottom:6pt"><tr>'
+      +'<td style="vertical-align:top">'
+      +'<div style="font-size:22pt;font-weight:bold;line-height:1.1;color:#000">'+lenderName+'</div>'
+      +(lenderAddr?'<div style="font-size:13pt;line-height:1.35;margin-top:2pt">'+lenderAddr+'</div>':'')
+      +(lenderID?'<div style="font-size:12pt;line-height:1.3;margin-top:1pt">เลขประจำตัวประชาชน '+lenderID+'</div>':'')
+      +'</td>'
+      +'<td style="text-align:right;vertical-align:top;white-space:nowrap;width:38%">'
+      +'<div style="font-size:20pt;font-weight:bold;color:#c00;letter-spacing:.5pt">ใบสำคัญจ่าย</div>'
+      +'<div style="font-size:13pt;margin-top:3pt">No. '+no+'</div>'
+      +'<div style="font-size:13pt;margin-top:1pt">'+lbl+'</div>'
+      +'<div style="font-size:13pt;margin-top:1pt">วันที่ '+_vShortDate(dateISO)+'</div>'
+      +'</td></tr></table>'
+      +'<div style="border-top:1.5pt solid #000;margin-bottom:8pt"></div>'
+      +'<table style="width:100%;border-collapse:collapse;margin-bottom:6pt">'
+      +'<tr><td style="border:1px solid #999;border-bottom:none;'+CELL+'font-weight:bold;width:25%">ชื่อ-นามสกุล ผู้รับเงิน</td>'
+      +'<td style="border:1px solid #999;border-left:none;border-bottom:none;'+CELL+'">'+recvNames+'</td></tr>'
+      +'<tr><td style="border:1px solid #999;border-top:none;'+CELL+'font-weight:bold">ที่อยู่</td>'
+      +'<td style="border:1px solid #999;border-left:none;border-top:none;'+CELL+'word-break:break-word">'+recvAddr+'</td></tr>'
+      +'</table>'
+      +'<table style="width:100%;border-collapse:collapse;margin-bottom:4pt">'
+      +'<tr style="background:#e8efe9"><th style="border:1px solid #999;'+CELL+'text-align:center">รายละเอียดการจ่ายเงิน</th>'
+      +'<th style="border:1px solid #999;'+CELL+'text-align:center;width:28%">จำนวนเงิน (บาท)</th></tr>'
+      +rowsHTML
+      +'<tr style="background:#d4e1d6;font-weight:bold">'
+      +'<td style="border:1px solid #999;'+CELL+'">รวมเงินที่จ่าย &nbsp; '+_vToBaht(totalAmt)+'</td>'
+      +'<td style="border:1px solid #999;'+CELL+'text-align:right">'+totalAmt.toLocaleString('th-TH')+'</td>'
+      +'</tr></table>'
+      +'</div>'
+      +'<div>'
+      +'<table style="width:100%;border-collapse:collapse"><tr>'
+      +'<td style="text-align:center;vertical-align:bottom;width:50%;padding:0 4px 2mm">'
+      +'<div style="border-top:1px solid #000;width:140px;margin:0 auto 2pt"></div>'
+      +'<div style="font-size:13pt;font-weight:600;line-height:1.1">ผู้จ่ายเงิน</div>'
+      +'<div style="font-size:12pt;line-height:1.1;margin-top:0pt">( '+lenderName+' )</div></td>'
+      +'<td style="text-align:center;vertical-align:bottom;width:50%;padding:0 4px 2mm">'
+      +'<div style="border-top:1px solid #000;width:140px;margin:0 auto 2pt"></div>'
+      +'<div style="font-size:13pt;font-weight:600;line-height:1.1">ผู้รับเงิน</div>'
+      +'<div style="font-size:12pt;line-height:1.1;margin-top:0pt">( '+recvNames+' )</div></td>'
+      +'</tr></table>'
+      +'</div>'
+      +'</div>';
+  }
+  
+  var html='<div style="height:100vh;display:flex;flex-direction:column;box-sizing:border-box;background:#fff">'
+    +copy('ต้นฉบับ')
+    +'<hr style="border:none;border-top:2px dashed #aaa;margin:0;flex-shrink:0">'
+    +copy('สำเนา')
+    +'</div>';
+  
+  var w=window.open('','_blank','width=850,height=1100');
+  if(!w){alert('โปรดอนุญาต popup เพื่อพิมพ์ใบสำคัญจ่าย');return;}
+  w.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>ใบสำคัญจ่าย '+no+'</title>');
+  w.document.write('<style>@page{size:A4;margin:0}body{margin:0;padding:0;font-family:"TH Sarabun New",Sarabun,Arial,sans-serif}@media print{body{margin:0}}</style>');
+  w.document.write('</head><body>'+html+'</body></html>');
+  w.document.close();
+  w.focus();
+  setTimeout(function(){w.print();},300);
+}
+
+// init: เพิ่มแถวจ่ายแรกอัตโนมัติ
+setTimeout(function(){if(document.getElementById('loan_pay_rows')&&document.getElementById('loan_pay_rows').children.length===0)addLoanPay();},100);
 </script>
 </body>
 </html>
