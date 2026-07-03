@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>สัญญากู้เงิน — บริษัท โชคชัย เงินด่วน จำกัด</title>
+<title>สัญญากู้เงิน — ร้านแชมป์ลิสซิ่ง</title>
 <meta name="theme-color" content="#1a3a2a">
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
@@ -153,8 +153,13 @@ body{
   /* ซ่อนทุกอย่างยกเว้น preview */
   body>*{display:none!important}
   #sec-preview{display:block!important}
+  body.printing-voucher #sec-preview{display:none!important}
+  body.printing-voucher #gv-preview-loan{display:block!important}
+  body.printing-schedule #sec-preview{display:none!important}
+  body.printing-schedule #gv-preview-schedule{display:block!important}
   .pbtns,.back-home,.schedule-toolbar,.font-ctrl{display:none!important}
   .doc{min-height:auto!important;overflow:visible!important}
+  .doc.editing{outline:none!important}
   .doc-sigs{page-break-inside:avoid!important}
   .doc-clause{page-break-inside:avoid!important}
   /* doc wrapper */
@@ -240,6 +245,18 @@ body{
   font-size:19px;font-weight:700;letter-spacing:-.2px;margin-bottom:4px;line-height:1.2;
 }
 .ui-head p{font-size:13px;opacity:.78;font-weight:300}
+.ui-head-reset{
+  padding:9px 14px;
+  background:rgba(255,255,255,.14);
+  border:1px solid rgba(255,255,255,.35);
+  color:#fffdf7;
+  border-radius:10px;
+  font-size:13px;font-weight:600;
+  font-family:inherit;cursor:pointer;
+  transition:transform .15s,background .15s;
+  white-space:nowrap;
+}
+.ui-head-reset:active{transform:translateY(1px);background:rgba(255,255,255,.26)}
 
 /* Item entry block (.ai = ผู้กู้/ค้ำ/หลักประกัน) */
 .ai{
@@ -323,7 +340,7 @@ body{
 
 /* Checkbox row (.chips) */
 .chips{margin-bottom:10px}
-.chips label{
+.chips label, label.chips{
   display:inline-flex;align-items:center;gap:8px;
   padding:9px 14px;
   background:var(--field-bg);
@@ -331,14 +348,20 @@ body{
   border-radius:10px;
   font-size:14px;font-weight:500;
   cursor:pointer;color:var(--ink);
-  transition:background .15s,border-color .15s;
+  transition:background .15s,border-color .15s,color .15s,box-shadow .15s;
 }
-.chips label:has(input:checked){
-  background:var(--primary-soft);
+.chips label:has(input:checked), label.chips:has(input:checked),
+.chips label.is-checked, label.chips.is-checked{
+  background:var(--primary);
   border-color:var(--primary);
-  color:var(--primary);font-weight:600;
+  color:#fff;font-weight:700;
+  box-shadow:0 2px 8px rgba(15,46,33,.25);
 }
-.chips input[type="checkbox"]{width:16px;height:16px;accent-color:var(--primary)}
+.chips label:has(input:checked)::before, label.chips:has(input:checked)::before,
+.chips label.is-checked::before, label.chips.is-checked::before{
+  content:"✓ ";font-weight:900;font-size:15px;
+}
+.chips input[type="checkbox"], label.chips input[type="checkbox"]{width:16px;height:16px;accent-color:#fff}
 
 /* Preview / button row */
 .pbtns{display:flex;gap:10px;margin-top:8px;flex-wrap:wrap}
@@ -529,15 +552,17 @@ body{
   text-indent:1cm;
   margin-bottom:2pt;
   text-align:justify;
-  overflow-wrap:anywhere;
-  word-break:break-all;
+  word-break:keep-all;
+  line-break:strict;
+  hyphens:none;
 }
 .doc-clause{
   text-indent:1cm;
   margin-bottom:2pt;
   text-align:justify;
-  overflow-wrap:anywhere;
-  word-break:break-all;
+  word-break:keep-all;
+  line-break:strict;
+  hyphens:none;
 }
 .doc-clause b{font-weight:bold;font-size:1.25em}
 .doc-center{
@@ -546,6 +571,8 @@ body{
 }
 
 .doc .nowrap{white-space:nowrap}
+.doc.editing{outline:2px dashed var(--accent);outline-offset:4px;cursor:text}
+.doc.editing:focus{outline-color:var(--primary)}
 
 /* Signatures (2-column grid at bottom) */
 .doc-sigs{
@@ -645,10 +672,12 @@ body{
 
 <div class="section active" id="sec-form">
 <div class="ui">
-  <div class="ui-head">
-    <a href="index.html" style="display:inline-flex;align-items:center;gap:6px;background:#fff;color:#1a4d3a;border:1px solid #ccc;padding:8px 14px;border-radius:10px;font-size:13px;font-weight:600;text-decoration:none;margin-bottom:12px;font-family:inherit">← กลับหน้าหลัก</a>
-    <h1>📄 หนังสือสัญญากู้เงินตามกฎหมาย</h1>
-    <p>ร้านแชมป์ลิสซิ่ง</p>
+  <div class="ui-head" style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap">
+    <div>
+      <h1>📄 หนังสือสัญญากู้เงินตามกฎหมาย</h1>
+      <p>ร้านแชมป์ลิสซิ่ง</p>
+    </div>
+    <button class="ui-head-reset" onclick="resetAll()" style="flex:0 0 auto">🔄 ล้างข้อมูล</button>
   </div>
 
   <div class="card">
@@ -715,7 +744,7 @@ body{
   <div class="card">
     <div class="ct"><span class="lhs"><span class="n">3</span> ผู้ค้ำประกัน</span></div>
     <div class="chips"><label><input type="checkbox" id="has_guarantor" onchange="toggleGuarantor()"> มีผู้ค้ำประกัน</label></div>
-    <div id="guarantor_wrap" style="display:none">
+    <div id="guarantor_wrap">
       <div id="guarantors"></div>
       <button class="add-btn" onclick="addGuarantor()">+ เพิ่มผู้ค้ำประกัน</button>
     </div>
@@ -733,7 +762,7 @@ body{
   <div class="card">
     <div class="ct"><span class="lhs"><span class="n">5</span> หลักประกัน</span></div>
     <div class="chips"><label><input type="checkbox" id="has_collateral" onchange="toggleCollateral()"> มีหลักประกัน</label></div>
-    <div id="collateral_wrap" style="display:none">
+    <div id="collateral_wrap">
       <div id="collaterals"></div>
       <button class="add-btn" onclick="addCollateral()">+ เพิ่มหลักทรัพย์</button>
     </div>
@@ -795,7 +824,9 @@ body{
   <div class="pbtns">
     <button class="pbk" onclick="backToForm()">← แก้ไข</button>
     <button class="pbk" onclick="resetAll()">🔄 ล้าง</button>
-    <button class="ppr" onclick="printContract()">🖨️ พิมพ์สัญญา</button>
+    <button class="pbk" id="editTextBtn" onclick="toggleEditText()">✏️ แก้คำ</button>
+    <button class="pbk" onclick="exportWord()">📄 Word</button>
+    <button class="ppr" onclick="printContract()">🖨️ พิมพ์ / PDF</button>
     <button class="ppr" onclick="printVoucher()" style="background:linear-gradient(135deg,#8b4513,#a0552a)">🧾 พิมพ์ใบสำคัญจ่าย</button>
   </div>
   <div class="font-ctrl">
@@ -805,7 +836,7 @@ body{
     <button onclick="adjustFont(0)" title="คืนค่าอัตโนมัติ" style="margin-left:6px;font-size:11px">⟲ อัตโนมัติ</button>
   </div>
   <div class="doc-wrap">
-    <div class="doc" id="doc-preview">
+    <div class="doc" id="doc-preview" lang="th">
       <div class="placeholder">กรอกข้อมูลแล้วกด <strong>"สร้างเอกสารสัญญา"</strong></div>
     </div>
   </div>
@@ -960,7 +991,7 @@ function _tdpBuildYM(did){
   var ymDiv=drop.querySelector('.tdp-ym');
   var ysel='<select onchange="tdpYMChange(\''+did+'\',\'y\',this.value)">';
   var curBE=s.cur.y+543;
-  for(var be=2540;be<=2590;be++){ysel+='<option value="'+(be-543)+'"'+(be===curBE?' selected':'')+'>'+be+'</option>';}
+  for(var be=2440;be<=2600;be++){ysel+='<option value="'+(be-543)+'"'+(be===curBE?' selected':'')+'>'+be+'</option>';}
   ysel+='</select>';
   var msel='<select onchange="tdpYMChange(\''+did+'\',\'m\',this.value)">';
   for(var mi=0;mi<12;mi++){msel+='<option value="'+mi+'"'+(mi===s.cur.m?' selected':'')+'>'+THMONTHS_F[mi]+'</option>';}
@@ -1008,9 +1039,17 @@ function tdpOpen(did){
     var p=hid.value.split('-');
     if(p.length===3){wrap._tdp.cur.y=parseInt(p[0]);wrap._tdp.cur.m=parseInt(p[1])-1;wrap._tdp.sel=hid.value;_tdpRender(did);}
   }
+  var card=wrap&&wrap.closest('.card');
+  if(card)card.style.zIndex=50;
 }
 function tdpClose(){
-  if(_tdpOpen){var d=document.getElementById('tdpd_'+_tdpOpen);if(d)d.classList.remove('open');_tdpOpen=null;}
+  if(_tdpOpen){
+    var d=document.getElementById('tdpd_'+_tdpOpen);if(d)d.classList.remove('open');
+    var w=document.getElementById('tdpw_'+_tdpOpen);
+    var card=w&&w.closest('.card');
+    if(card)card.style.zIndex='';
+    _tdpOpen=null;
+  }
 }
 function tdpNav(did,delta,e){
   if(e)e.stopPropagation();
@@ -1121,6 +1160,19 @@ function _tdpWireEvents(did){
 
 const DIRS=['นาย ชุณนเกียรติ จรัสบวรพันธ์','นาง ชญาน์นัทช์ จรัสบวรพันธ์','นาย กันตพัฒน์ จรัสบวรพันธ์','นางสาว ภัคฐ์พิชา จรัสบวรพันธ์'];
 let bC=0,gC=0,cC=0;
+
+// ─── แสดงสถานะติ๊กถูกของ .chips ให้ชัดเจนเสมอ (เผื่อเบราว์เซอร์ไม่รองรับ :has()) ───
+function syncChipCheckbox(cb){
+  var lbl=cb.closest('label');
+  if(!lbl) return;
+  if(cb.checked) lbl.classList.add('is-checked'); else lbl.classList.remove('is-checked');
+}
+function syncAllChips(root){
+  (root||document).querySelectorAll('.chips input[type="checkbox"]').forEach(syncChipCheckbox);
+}
+document.addEventListener('change',function(e){
+  if(e.target && e.target.matches && e.target.matches('.chips input[type="checkbox"]')) syncChipCheckbox(e.target);
+},true);
 
 function gv(id){const e=document.getElementById(id);return e?(e.value||'').trim():''}
 function gc(id){const e=document.getElementById(id);return e?e.checked:false}
@@ -1285,6 +1337,7 @@ function addGuarantor(){
   var idx=gC;
   document.getElementById('guarantors').appendChild(elN(personBlock('g',idx)));
   wirePerson('g',idx);
+  setChip('has_guarantor',true);
 }
 
 function wirePerson(p,i){
@@ -1320,15 +1373,34 @@ function calcAgeFromISO(iso){
   return age>0?String(age):'';
 }
 
-function removePerson(p,i){const n=document.getElementById(`${p}-${i}`);if(n)n.remove()}
+function removePerson(p,i){
+  const n=document.getElementById(`${p}-${i}`);
+  if(n)n.remove();
+  if(p==='g' && !document.querySelector('[id^="g-"]')) setChip('has_guarantor',false);
+}
+
+function setChip(id,checked){
+  const el=document.getElementById(id);
+  if(!el) return;
+  el.checked=checked;
+  syncChipCheckbox(el);
+}
 
 function toggleGuarantor(){
-  document.getElementById('guarantor_wrap').style.display=gc('has_guarantor')?'':'none';
-  if(gc('has_guarantor') && gC===0)addGuarantor();
+  if(gc('has_guarantor')){
+    if(gC===0)addGuarantor();
+  }else{
+    document.getElementById('guarantors').innerHTML='';
+    gC=0;
+  }
 }
 function toggleCollateral(){
-  document.getElementById('collateral_wrap').style.display=gc('has_collateral')?'':'none';
-  if(gc('has_collateral') && cC===0)addCollateral();
+  if(gc('has_collateral')){
+    if(cC===0)addCollateral();
+  }else{
+    document.getElementById('collaterals').innerHTML='';
+    cC=0;
+  }
 }
 
 function formatID(input){
@@ -1377,7 +1449,7 @@ function collateralFields(i,type){
       <div><label>จังหวัด</label><input type="text" id="c${i}_province" value="นครราชสีมา"></div>
       <div><label>อำเภอ</label><input type="text" id="c${i}_amphoe"></div>
       <div class="fw"><label>ตำบล</label><input type="text" id="c${i}_tambon"></div>
-      <div class="fw"><label class="chips" style="margin:0"><input type="checkbox" id="c${i}_building" checked> พร้อมสิ่งปลูกสร้างที่มีอยู่และเกิดขึ้นในอนาคต</label></div>
+      <div class="fw"><label class="chips is-checked" style="margin:0"><input type="checkbox" id="c${i}_building" checked> พร้อมสิ่งปลูกสร้างที่มีอยู่และเกิดขึ้นในอนาคต</label></div>
     </div>`;
   }
   if(type==='car'||type==='motorcycle'){
@@ -1412,6 +1484,7 @@ function addCollateral(){
   cC++;
   document.getElementById('collaterals').appendChild(elN(collateralBlock(cC)));
   setTimeout(()=>wireColAddr(cC),20);
+  setChip('has_collateral',true);
 }
 function wireColAddr(i){
   try{
@@ -1421,7 +1494,11 @@ function wireColAddr(i){
     }
   }catch(e){}
 }
-function removeCollateral(i){const n=document.getElementById(`c-${i}`);if(n)n.remove()}
+function removeCollateral(i){
+  const n=document.getElementById(`c-${i}`);
+  if(n)n.remove();
+  if(!document.querySelector('[id^="c-"]')) setChip('has_collateral',false);
+}
 function changeColType(i,t){
   document.getElementById(`c${i}_fields`).innerHTML=collateralFields(i,t);
   setTimeout(()=>wireColAddr(i),20);
@@ -1480,15 +1557,18 @@ function fmtDateParts(s){
 function autoFillDue(){
   const cd=getTDPVal('contract_date');
   const dueInp=document.getElementById('tdpi_due_date');
-  if(cd && dueInp && !dueInp.value){
+  if(cd && dueInp){
     const o=parseBEDate(cd);
     if(o){
       const dd=String(o.d).padStart(2,'0'),mm=String(o.m).padStart(2,'0');
       const newDate=`${dd}/${mm}/${o.y+1}`;
       dueInp.value=newDate;
+      dueInp.classList.remove('er');dueInp.classList.add('ok');
       // ตั้ง hidden ISO ด้วย
       const hid=document.getElementById('due_date');
       if(hid)hid.value=`${o.y+1-543}-${mm}-${dd}`;
+      // sync picker state ของ due_date ด้วย ไม่งั้นถ้าเปิดปฏิทินจะยังโชว์เดือน/ปีเดิม
+      try{ tdpSetValue('due_date',`${o.y+1-543}-${mm}-${dd}`); }catch(e){}
     }
   }
 }
@@ -1533,16 +1613,23 @@ function readCollaterals(){
   return list;
 }
 
+// ─── กรุงเทพฯ ใช้ "แขวง/เขต" แทน "ตำบล/อำเภอ" และไม่มีคำว่า "จังหวัด" นำหน้า ───
+function _isBKK(prov){ return prov==='กรุงเทพมหานคร'; }
+function _subLabel(prov){ return _isBKK(prov)?'แขวง':'ตำบล'; }
+function _distLabel(prov){ return _isBKK(prov)?'เขต':'อำเภอ'; }
+function _provLabel(prov){ return _isBKK(prov)?'':'จังหวัด'; }
+
 function fmtCol(c){
   const lbl={land:'โฉนดที่ดิน',nsk:'น.ส.3 ก.',car:'รถยนต์',motorcycle:'รถจักรยานยนต์',gold:'ทองคำ/เครื่องประดับ',bank:'บัญชีเงินฝาก',other:'ทรัพย์สิน'}[c.type];
+  const nw=v=>'<span class="nowrap">'+(v||'..........')+'</span>';
   if(c.type==='land'||c.type==='nsk'){
-    let s=`${lbl} เลขที่ ${c.doc||'..........'} เลขที่ดิน ${c.land||'..........'} ตำบล ${c.tambon||'..........'} อำเภอ ${c.amphoe||'..........'} จังหวัด ${c.province||'..........'}`;
-    if(c.building)s+=' พร้อมสิ่งปลูกสร้างที่มีอยู่และเกิดขึ้นในอนาคต';
+    let s=`${lbl} เลขที่ ${nw(c.doc)} เลขที่ดิน ${nw(c.land)} <span class="nowrap">${_subLabel(c.province)}${c.tambon||'..........'}</span> <span class="nowrap">${_distLabel(c.province)}${c.amphoe||'..........'}</span> <span class="nowrap">${_provLabel(c.province)}${c.province||'..........'}</span>`;
+    if(c.building)s+=' พร้อมสิ่งปลูกสร้างที่มีอยู่และที่จะเกิดขึ้นในอนาคต';
     return s;
   }
-  if(c.type==='car'||c.type==='motorcycle')return `${lbl} ทะเบียน ${c.plate||'..........'} ยี่ห้อ ${c.brand||'..........'} รุ่น ${c.model||'..........'} สี ${c.color||'..........'} เลขตัวถัง ${c.chassis||'..........'} เลขเครื่อง ${c.engine||'..........'}`;
+  if(c.type==='car'||c.type==='motorcycle')return `${lbl} ทะเบียน ${nw(c.plate)} ยี่ห้อ ${nw(c.brand)} รุ่น ${nw(c.model)} สี ${nw(c.color)} เลขตัวถัง ${nw(c.chassis)} เลขเครื่อง ${nw(c.engine)}`;
   if(c.type==='gold')return `${lbl} ${c.items||'..........'}`;
-  if(c.type==='bank')return `${lbl} ธนาคาร ${c.bank||'..........'} เลขบัญชี ${c.acct||'..........'} ชื่อบัญชี ${c.aname||'..........'} ยอดเงิน ${c.balance||'..........'} บาท`;
+  if(c.type==='bank')return `${lbl} ธนาคาร ${nw(c.bank)} เลขบัญชี ${nw(c.acct)} ชื่อบัญชี ${nw(c.aname)} ยอดเงิน ${nw(c.balance)} บาท`;
   return c.detail||'..........';
 }
 
@@ -1555,9 +1642,13 @@ function fmtPersonList(list){
     return '<span class="nowrap">'+nm+'</span>'+idc;
   }).join(', ');
   const ages=list.map(p=>p.age||'..').join(', ');
-  const addrs=list.map(p=>'<span class="nowrap">'+(p.addr||'..........')+'</span>').join(', ');
-  const t=list[0].tambon||'..........',a=list[0].amphoe||'..........',pv=list[0].province||'..........';
-  return `${names} อายุ ${ages} ปี อยู่บ้านเลขที่ ${addrs} <span class="nowrap">ตำบล${t}</span> <span class="nowrap">อำเภอ${a}</span> <span class="nowrap">จังหวัด${pv}</span>`;
+  // ที่อยู่ของแต่ละคนแยกครบ (บ้านเลขที่ + ตำบล/อำเภอ/จังหวัด) กันข้อมูลของคนที่ 2 เป็นต้นไปหาย
+  const addrParts=list.map(function(p){
+    const houseNo=p.addr||'..........';
+    const t=p.tambon||'..........',a=p.amphoe||'..........',pv=p.province||'..........';
+    return '<span class="nowrap">'+houseNo+'</span> <span class="nowrap">'+_subLabel(p.province)+t+'</span> <span class="nowrap">'+_distLabel(p.province)+a+'</span> <span class="nowrap">'+_provLabel(p.province)+pv+'</span>';
+  }).join(', ');
+  return `${names} อายุ ${ages} ปี อยู่บ้านเลขที่ ${addrParts}`;
 }
 
 // ─── ตารางผ่อนชำระ ───
@@ -1676,10 +1767,7 @@ function printSchedule(){
     if(name) borrowers.push(title+' '+name);
   });
   var borrowerText=borrowers.length?borrowers.join(', '):'(ยังไม่ได้กรอก)';
-  
-  var w=window.open('','_blank','width=900,height=1000');
-  if(!w){alert('โปรดอนุญาต popup เพื่อปริ้นตาราง');return;}
-  
+
   var css=`
     *{box-sizing:border-box;margin:0;padding:0}
     body{font-family:'Sarabun','TH Sarabun New',Arial,sans-serif;padding:24px;color:#000;background:#fff}
@@ -1695,29 +1783,37 @@ function printSchedule(){
     .summary{padding:10pt 12pt;background:#fcf7eb;border:1px solid #e4cfa9;border-radius:6pt;font-size:11.5pt;line-height:1.7}
     .summary b{color:#0f2e21}
     .foot{text-align:center;margin-top:14pt;font-size:9pt;color:#888;font-style:italic}
-    @media print{
-      body{padding:8pt}
-      .no-print{display:none!important}
-      @page{size:A4;margin:0}
-    }
   `;
-  
-  w.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>ตารางผ่อนชำระ</title><style>'+css+'</style></head><body>');
-  w.document.write('<h1>📋 ตารางผ่อนชำระเงินกู้</h1>');
-  w.document.write('<div class="meta">');
-  w.document.write('<div><b>ผู้ให้กู้:</b> '+lender+'</div>');
-  w.document.write('<div><b>ผู้กู้:</b> '+borrowerText+'</div>');
-  w.document.write('<div><b>เงินต้น:</b> '+(parseFloat(amount.replace(/,/g,''))||0).toLocaleString('th-TH')+' บาท · <b>ดอกเบี้ย:</b> '+rate+'% ต่อปี</div>');
+
+  var html='<style>'+css+'</style>';
+  html+='<h1>📋 ตารางผ่อนชำระเงินกู้</h1>';
+  html+='<div class="meta">';
+  html+='<div><b>ผู้ให้กู้:</b> '+lender+'</div>';
+  html+='<div><b>ผู้กู้:</b> '+borrowerText+'</div>';
+  html+='<div><b>เงินต้น:</b> '+(parseFloat(amount.replace(/,/g,''))||0).toLocaleString('th-TH')+' บาท · <b>ดอกเบี้ย:</b> '+rate+'% ต่อปี</div>';
   if(contractDate&&dueDate){
-    w.document.write('<div><b>วันทำสัญญา:</b> '+jsDateToShortBE(new Date(contractDate))+' · <b>วันครบกำหนด:</b> '+jsDateToShortBE(new Date(dueDate))+'</div>');
+    html+='<div><b>วันทำสัญญา:</b> '+jsDateToShortBE(new Date(contractDate))+' · <b>วันครบกำหนด:</b> '+jsDateToShortBE(new Date(dueDate))+'</div>';
   }
-  w.document.write('</div>');
-  w.document.write(tableEl.innerHTML.replace('<table class="schedule-table">','<table>').replace('class="schedule-table"',''));
-  if(sumEl) w.document.write(sumEl.outerHTML.replace('class="schedule-summary"','class="summary"'));
-  w.document.write('<div class="foot">เอกสารนี้ใช้ประกอบการพิจารณาเท่านั้น — ไม่ใช่หลักฐานทางกฎหมาย</div>');
-  w.document.write('</body></html>');
-  w.document.close();
-  setTimeout(function(){w.focus();w.print();},250);
+  html+='</div>';
+  html+=tableEl.innerHTML.replace('<table class="schedule-table">','<table>').replace('class="schedule-table"','');
+  if(sumEl) html+=sumEl.outerHTML.replace('class="schedule-summary"','class="summary"');
+  html+='<div class="foot">เอกสารนี้ใช้ประกอบการพิจารณาเท่านั้น — ไม่ใช่หลักฐานทางกฎหมาย</div>';
+
+  // พิมพ์ในหน้าเดิม (ไม่เปิดหน้าต่างใหม่) กันปัญหาเบราว์เซอร์มือถือ/แอปในตัวค้าง
+  var box=document.getElementById('gv-preview-schedule');
+  if(!box){alert('เกิดข้อผิดพลาด: ไม่พบพื้นที่แสดงตารางผ่อนชำระ');return;}
+  box.innerHTML=html;
+  document.body.classList.add('printing-schedule');
+  var _cleanup=function(){
+    document.body.classList.remove('printing-schedule');
+    box.innerHTML='';
+    window.removeEventListener('afterprint',_cleanup);
+  };
+  window.addEventListener('afterprint',_cleanup);
+  setTimeout(function(){
+    window.print();
+    setTimeout(_cleanup,4000);
+  },50);
 }
 
 function updateSchedule(){
@@ -1838,7 +1934,7 @@ function fitContentToA4(){
 
   // Binary search หา auto ratio
   var lo=0.3,hi=2.5;
-  for(var i=0;i<16;i++){
+  for(var i=0;i<11;i++){
     var mid=(lo+hi)/2;
     docEl.style.setProperty('--doc-fs',(_baseFs*mid).toFixed(3)+'pt');
     docEl.style.setProperty('--doc-h1',(_baseH1*mid).toFixed(3)+'pt');
@@ -1865,6 +1961,90 @@ function fitContentToA4(){
 }
 
 function printContract(){window.print();}
+
+// ─── แก้คำในเอกสารก่อนพิมพ์ ───
+function toggleEditText(){
+  var docEl=document.getElementById('doc-preview');
+  var btn=document.getElementById('editTextBtn');
+  if(!docEl) return;
+  var on=docEl.getAttribute('contenteditable')==='true';
+  if(on){
+    docEl.removeAttribute('contenteditable');
+    docEl.classList.remove('editing');
+    if(btn) btn.textContent='✏️ แก้คำ';
+  }else{
+    docEl.setAttribute('contenteditable','true');
+    docEl.classList.add('editing');
+    if(btn) btn.textContent='✅ เสร็จแล้ว';
+    docEl.focus();
+  }
+}
+
+// ─── ส่งออกเป็น Word (.doc) ───
+function exportWord(){
+  var docEl=document.getElementById('doc-preview');
+  if(!docEl || docEl.querySelector('.placeholder')){
+    alert('กรุณาสร้างเอกสารสัญญาก่อน');
+    return;
+  }
+  var borrowers=readPersons('b');
+  var fname='สัญญากู้เงิน_'+(borrowers[0]&&borrowers[0].name?borrowers[0].name.replace(/\s+/g,''):'เอกสาร')+'.doc';
+  var bodyHtml=docEl.innerHTML;
+  var css=`
+    body{font-family:'TH Sarabun New','Sarabun',Arial,sans-serif;font-size:16pt;line-height:1.5;color:#000;}
+    .fp-boxes{display:none}
+    .doc-h1{text-align:center;font-weight:bold;font-size:20pt;text-decoration:underline;margin-bottom:6pt}
+    .doc-meta{text-align:right;margin:2pt 0 8pt}
+    .doc-meta p{margin:1pt 0}
+    .doc-start,.doc-clause{text-indent:1cm;text-align:justify;margin-bottom:6pt}
+    .doc-clause b{font-weight:bold}
+    .doc-center{text-align:center;margin:10pt 0 6pt}
+    .doc-sigs{width:100%;margin-top:24pt}
+    .sig-col{display:inline-block;width:48%;vertical-align:top}
+    .sig-cell{text-align:center;margin-bottom:26pt}
+    .sig-line{border-bottom:1px solid #000;width:80%;margin:0 auto 4pt;height:1.6em}
+    .sig-name,.sig-role,.sig-sub{text-align:center}
+    .nowrap{white-space:nowrap}
+  `;
+  var html='<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">'
+    +'<head><meta charset="UTF-8"><title>สัญญากู้เงิน</title>'
+    +'<!--[if gte mso 9]><xml><w:WordDocument><w:View>Print</w:View><w:Zoom>100</w:Zoom></w:WordDocument></xml><![endif]-->'
+    +'<style>@page{size:21cm 29.7cm;margin:2cm 2cm 2cm 3cm}'+css+'</style></head>'
+    +'<body>'+bodyHtml+'</body></html>';
+  var blob=new Blob(['\ufeff'+html],{type:'application/msword'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  a.href=url;a.download=fname;
+  document.body.appendChild(a);a.click();
+  setTimeout(function(){document.body.removeChild(a);URL.revokeObjectURL(url);},1000);
+}
+
+// ─── ตัดคำไทยให้ถูกจุด (กันคำขาดตอนขึ้นบรรทัดใหม่/พิมพ์) ───
+// ใช้ Intl.Segmenter (ถ้ามี) หาขอบเขตคำจริง แล้วแทรก zero-width space
+// ระหว่างคำ — ใช้คู่กับ CSS word-break:keep-all เพื่อให้เบราว์เซอร์ตัดบรรทัด
+// เฉพาะจุดที่เป็นขอบเขตคำจริงเท่านั้น ไม่ตัดกลางคำ
+var _thSeg=null;
+try{ if(typeof Intl!=='undefined' && Intl.Segmenter) _thSeg=new Intl.Segmenter('th',{granularity:'word'}); }catch(e){_thSeg=null;}
+function thaiSoftWrap(str){
+  if(!str||!_thSeg) return str;
+  try{
+    var out='';
+    for(const s of _thSeg.segment(str)) out+=s.segment+'\u200B';
+    return out;
+  }catch(e){ return str; }
+}
+function applyThaiWrap(root){
+  if(!root||!_thSeg) return;
+  try{
+    var walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT,null);
+    var nodes=[];
+    var n;
+    while((n=walker.nextNode())) nodes.push(n);
+    nodes.forEach(function(tn){
+      if(tn.nodeValue && tn.nodeValue.trim()) tn.nodeValue=thaiSoftWrap(tn.nodeValue);
+    });
+  }catch(e){}
+}
 
 function calcDocSizes(total,extraLines){
   var weight=total+(extraLines||0)*0.5;
@@ -1915,7 +2095,7 @@ function generateContract(){
   html+=`<div class="doc-meta"><p>ทำที่ ${place}</p><p>วันที่ ${dp.d} เดือน ${dp.m} พ.ศ. ${dp.y}</p></div>`;
 
   const bText=fmtPersonList(borrowers);
-  html+=`<div class="doc-start">ข้าพเจ้า ${bText} ได้ทำหนังสือสัญญากู้เงินให้ไว้แก่ ${lender} ในฐานะผู้ให้กู้ มีข้อสัญญาดังต่อไปนี้</div>`;
+  html+=`<div class="doc-start">ข้าพเจ้า ${bText} ได้ทำหนังสือสัญญากู้เงินให้ไว้แก่ <span class="nowrap">${lender}</span> ในฐานะผู้ให้กู้ มีข้อสัญญาดังต่อไปนี้</div>`;
 
   if(guarantors.length>0){
     const gText=fmtPersonList(guarantors);
@@ -1944,7 +2124,7 @@ function generateContract(){
     const display=(fullName||'').trim()||'..............................................';
     let r=`<div class="sig-cell">
       <div class="sig-line"></div>
-      <div class="sig-name">( ${display} )</div>
+      <div class="sig-name">( <span class="nowrap">${display}</span> )</div>
       <div class="sig-role">${role}</div>`;
     if(sub)r+=`<div class="sig-sub">${sub}</div>`;
     r+='</div>';
@@ -1965,6 +2145,7 @@ function generateContract(){
   html+=`<div class="doc-sigs"><div class="sig-col">${leftCol}</div><div class="sig-col">${rightCol}</div></div>`;
 
   document.getElementById('doc-preview').innerHTML=html;
+  applyThaiWrap(document.getElementById('doc-preview'));
   document.getElementById('sec-form').classList.remove('active');
   document.getElementById('sec-preview').classList.add('active');
   window.scrollTo(0,0);
@@ -1977,18 +2158,20 @@ function backToForm(){
   window.scrollTo(0,0);
 }
 
+var _skipAutoSave=false;
 function resetAll(){
   if(!confirm('ล้างข้อมูลทั้งหมดและเริ่มใหม่?'))return;
+  _skipAutoSave=true;
   localStorage.removeItem('loanContractData');
   location.reload();
 }
 
 // ─── Auto-save / Restore ───
 function autoSave(){
-  const data={fields:{},bC,gC,cC,colTypes:{},lpRows:[]};
-  // เก็บ visible inputs ทั่วไป — แต่ไม่เก็บ lp_* (มี dedicated section)
+  if(_skipAutoSave) return;
+  const data={fields:{},bC,gC,cC,colTypes:{}};
+  // เก็บเฉพาะ visible inputs (tdpi_* และ field อื่น) + hidden TDP
   document.querySelectorAll('input[id],select[id],textarea[id]').forEach(e=>{
-    if(/^lp_(type|amt|detail)_/.test(e.id))return; // skip — saved in lpRows
     if(e.type==='checkbox')data.fields[e.id]=e.checked;
     else data.fields[e.id]=e.value;
   });
@@ -1997,21 +2180,12 @@ function autoSave(){
     const te=document.getElementById(`c${i}_type`);
     if(te)data.colTypes[i]=te.value;
   });
-  // เก็บ loan_pay rows เป็น array — รักษาลำดับ + ค่าจริง (ไม่ผูกกับ id)
-  document.querySelectorAll('#loan_pay_rows .loan-pay-row').forEach(el=>{
-    const i=el.id.split('-')[1];
-    data.lpRows.push({
-      type:gv('lp_type_'+i)||'cash',
-      amt:gv('lp_amt_'+i)||'',
-      detail:gv('lp_detail_'+i)||''
-    });
-  });
   try{localStorage.setItem('loanContractData',JSON.stringify(data))}catch(e){}
 }
 
 function autoRestore(){
   const raw=localStorage.getItem('loanContractData');
-  if(!raw){addBorrower();return}
+  if(!raw){return}
   try{
     const data=JSON.parse(raw);
     bC=data.bC||0;gC=data.gC||0;cC=data.cC||0;
@@ -2030,8 +2204,9 @@ function autoRestore(){
         const e=document.getElementById(id);
         if(e){if(e.type==='checkbox')e.checked=val;else e.value=val}
       });
-      document.getElementById('guarantor_wrap').style.display=gc('has_guarantor')?'':'none';
-      document.getElementById('collateral_wrap').style.display=gc('has_collateral')?'':'none';
+      document.getElementById('guarantor_wrap').style.display='';
+      document.getElementById('collateral_wrap').style.display='';
+      syncAllChips();
       // wire wires
       for(let i=1;i<=bC;i++){wirePerson('b',i);
         // คำนวณอายุ
@@ -2043,43 +2218,40 @@ function autoRestore(){
       for(let i=1;i<=cC;i++)wireColAddr(i);
       try{tdpInit('contract_date',function(){autoFillDue();updateSchedule();});_tdpWireEvents('contract_date');}catch(e){}
       try{tdpInit('due_date',function(){updateSchedule();});_tdpWireEvents('due_date');}catch(e){}
-      if(bC===0)addBorrower();
       setTimeout(updateSchedule,80);
-      // restore loan_pay rows (หลังจาก amount field ถูก restore แล้ว)
-      const lpData=data.lpRows||[];
-      const lpWrap=document.getElementById('loan_pay_rows');
-      if(lpWrap && lpData.length>0){
-        lpWrap.innerHTML='';
-        _loanPayCounter=0;
-        lpData.forEach(function(rowData){
-          addLoanPay();
-          const newId=_loanPayCounter;
-          const tSel=document.getElementById('lp_type_'+newId);
-          const aInp=document.getElementById('lp_amt_'+newId);
-          const dInp=document.getElementById('lp_detail_'+newId);
-          if(tSel)tSel.value=rowData.type;
-          if(aInp)aInp.value=rowData.amt;
-          if(dInp)dInp.value=rowData.detail;
-          onLoanPayTypeChange(newId);
-        });
-      }
     },120);
-  }catch(e){if(bC===0)addBorrower()}
+  }catch(e){}
 }
 
 window.addEventListener('DOMContentLoaded',function(){
   autoRestore();
+  syncAllChips();
+  // เอา animation ออกหลังเล่นจบ เพราะ animation ที่ยังผูกกับ transform/opacity
+  // ทำให้การ์ดกลายเป็น stacking context ถาวร ทำให้ปฏิทินที่เปิดในการ์ดหนึ่ง
+  // โผล่ไปอยู่ "หลัง" การ์ดถัดไปแทนที่จะลอยทับด้านบนตามที่ตั้งใจ (z-index ถูกขังอยู่ในการ์ด)
+  setTimeout(function(){
+    document.querySelectorAll('.card').forEach(function(c){c.style.animation='none'});
+  },700);
   setTimeout(()=>{
     try{tdpInit('contract_date',function(){autoFillDue();updateSchedule();});_tdpWireEvents('contract_date');}catch(e){}
     try{tdpInit('due_date',function(){updateSchedule();});_tdpWireEvents('due_date');}catch(e){}
   },250);
 });
-setInterval(autoSave,2500);
+// บันทึกอัตโนมัติแบบ debounce (แทน setInterval ทุก 2.5 วิ ที่สแกนทั้งฟอร์มตลอดเวลา
+// แม้ผู้ใช้ไม่ได้พิมพ์อะไร — ลดภาระ CPU/localStorage ที่อาจทำให้เครื่องรุ่นเก่าหน่วง)
+var _autoSaveTimer=null;
+function scheduleAutoSave(){
+  if(_autoSaveTimer) clearTimeout(_autoSaveTimer);
+  _autoSaveTimer=setTimeout(autoSave,1200);
+}
+document.addEventListener('input',scheduleAutoSave,true);
+document.addEventListener('change',scheduleAutoSave,true);
 window.addEventListener('beforeunload',autoSave);
 </script>
 
 <!-- voucher preview hidden div -->
 <div id="gv-preview-loan" style="display:none"></div>
+<div id="gv-preview-schedule" style="display:none"></div>
 
 <script>
 // ─── ฟังก์ชันช่วยเหลือสำหรับใบสำคัญจ่าย ───
@@ -2246,32 +2418,46 @@ function printVoucher(){
   if(!lenderName){alert('กรุณาเลือกผู้ให้กู้ในสัญญาก่อน');return;}
   var lenderAddr=LENDER_PEOPLE[lenderName]||'';
   var lenderID=LENDER_IDS[lenderName]||'';
-  
+
   var borrowers=readPersons('b');
   if(borrowers.length===0){alert('กรุณากรอกข้อมูลผู้กู้ก่อน');return;}
-  
+
   var recvNames=borrowers.map(function(b){
     return (b.title||'')+' '+(b.name||'..........');
   }).join(', ');
-  
-  var b0=borrowers[0];
-  var recvAddr=(b0.addr||'..........');
-  if(b0.tambon)recvAddr+=' ตำบล'+b0.tambon;
-  if(b0.amphoe)recvAddr+=' อำเภอ'+b0.amphoe;
-  if(b0.province)recvAddr+=' จังหวัด'+b0.province;
-  
+
+  // ที่อยู่ของผู้กู้ทุกคน — คั่นด้วยจุลภาค (ที่อยู่1, ที่อยู่2, ...)
+  var recvAddrHTML=borrowers.map(function(b){
+    var a=(b.addr||'..........');
+    if(b.tambon)a+=' '+_subLabel(b.province)+b.tambon;
+    if(b.amphoe)a+=' '+_distLabel(b.province)+b.amphoe;
+    if(b.province)a+=' '+_provLabel(b.province)+b.province;
+    return a;
+  }).join(', ');
+
+  // ลายเซ็นผู้รับเงิน — ให้อยู่แถวเดียวกับผู้จ่ายเงิน (คนละคอลัมน์ แต่ระนาบเดียวกัน)
+  var _sigFont=borrowers.length>=4?'10.5pt':(borrowers.length===3?'11.5pt':'12.5pt');
+  var recvSigHTML=borrowers.map(function(b){
+    var nm=(b.title||'')+' '+(b.name||'..........');
+    return '<td style="width:'+(100/(borrowers.length+1))+'%;text-align:center;vertical-align:bottom;padding:0 4px 2mm">'
+      +'<div style="border-top:1px solid #000;width:120px;margin:0 auto 2pt"></div>'
+      +'<div style="font-size:'+_sigFont+';font-weight:600;line-height:1.1">ผู้รับเงิน</div>'
+      +'<div style="font-size:'+_sigFont+';line-height:1.1;margin-top:0pt">( <span class="nowrap">'+nm+'</span> )</div>'
+      +'</td>';
+  }).join('');
+
   var payRows=getLoanPayRows();
   if(payRows.length===0){alert('กรุณาเพิ่มอย่างน้อย 1 วิธีจ่ายและกรอกจำนวนเงิน');return;}
-  
+
   var totalAmt=0;
   payRows.forEach(function(r){totalAmt+=r.amt;});
-  
+
   var dateISO=getTDPVal('contract_date');
   var seq=gv('gv_bill_seq')||'01';
   var no=_vBillNo(dateISO,seq,lenderName);
-  
+
   var CELL='padding:5pt 7pt;font-size:14pt;';
-  
+
   function copy(lbl){
     // แถวรายการจ่าย — แต่ละบรรทัดเป็นวิธีจ่าย 1 แบบ
     var rowsHTML='';
@@ -2288,7 +2474,7 @@ function printVoucher(){
     // pad rows
     var pad=Math.max(0,3-payRows.length);
     while(pad-->0){rowsHTML+='<tr><td style="border:1px solid #999;'+CELL+'height:0.8cm"></td><td style="border:1px solid #999;'+CELL+'"></td></tr>';}
-    
+
     return '<div style="flex:1;min-height:0;padding:3mm 5mm;font-family:TH Sarabun New,Sarabun,Arial,sans-serif;box-sizing:border-box;display:flex;flex-direction:column;justify-content:space-between;overflow:hidden">'
       +'<div>'
       +'<table style="width:100%;border-collapse:collapse;margin-bottom:6pt"><tr>'
@@ -2308,7 +2494,7 @@ function printVoucher(){
       +'<tr><td style="border:1px solid #999;border-bottom:none;'+CELL+'font-weight:bold;width:25%">ชื่อ-นามสกุล ผู้รับเงิน</td>'
       +'<td style="border:1px solid #999;border-left:none;border-bottom:none;'+CELL+'">'+recvNames+'</td></tr>'
       +'<tr><td style="border:1px solid #999;border-top:none;'+CELL+'font-weight:bold">ที่อยู่</td>'
-      +'<td style="border:1px solid #999;border-left:none;border-top:none;'+CELL+'word-break:break-word">'+recvAddr+'</td></tr>'
+      +'<td style="border:1px solid #999;border-left:none;border-top:none;'+CELL+'word-break:break-word">'+recvAddrHTML+'</td></tr>'
       +'</table>'
       +'<table style="width:100%;border-collapse:collapse;margin-bottom:4pt">'
       +'<tr style="background:#e8efe9"><th style="border:1px solid #999;'+CELL+'text-align:center">รายละเอียดการจ่ายเงิน</th>'
@@ -2321,37 +2507,40 @@ function printVoucher(){
       +'</div>'
       +'<div>'
       +'<table style="width:100%;border-collapse:collapse"><tr>'
-      +'<td style="text-align:center;vertical-align:bottom;width:50%;padding:0 4px 2mm">'
-      +'<div style="border-top:1px solid #000;width:140px;margin:0 auto 2pt"></div>'
-      +'<div style="font-size:13pt;font-weight:600;line-height:1.1">ผู้จ่ายเงิน</div>'
-      +'<div style="font-size:12pt;line-height:1.1;margin-top:0pt">( '+lenderName+' )</div></td>'
-      +'<td style="text-align:center;vertical-align:bottom;width:50%;padding:0 4px 2mm">'
-      +'<div style="border-top:1px solid #000;width:140px;margin:0 auto 2pt"></div>'
-      +'<div style="font-size:13pt;font-weight:600;line-height:1.1">ผู้รับเงิน</div>'
-      +'<div style="font-size:12pt;line-height:1.1;margin-top:0pt">( '+recvNames+' )</div></td>'
+      +'<td style="width:'+(100/(borrowers.length+1))+'%;text-align:center;vertical-align:bottom;padding:0 4px 2mm">'
+      +'<div style="border-top:1px solid #000;width:120px;margin:0 auto 2pt"></div>'
+      +'<div style="font-size:'+_sigFont+';font-weight:600;line-height:1.1">ผู้จ่ายเงิน</div>'
+      +'<div style="font-size:'+_sigFont+';line-height:1.1;margin-top:0pt">( <span class="nowrap">'+lenderName+'</span> )</div></td>'
+      +recvSigHTML
       +'</tr></table>'
       +'</div>'
       +'</div>';
   }
-  
+
   var html='<div style="height:100vh;display:flex;flex-direction:column;box-sizing:border-box;background:#fff">'
     +copy('ต้นฉบับ')
     +'<hr style="border:none;border-top:2px dashed #aaa;margin:0;flex-shrink:0">'
     +copy('สำเนา')
     +'</div>';
-  
-  var w=window.open('','_blank','width=850,height=1100');
-  if(!w){alert('โปรดอนุญาต popup เพื่อพิมพ์ใบสำคัญจ่าย');return;}
-  w.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>ใบสำคัญจ่าย '+no+'</title>');
-  w.document.write('<style>@page{size:A4;margin:0}body{margin:0;padding:0;font-family:"TH Sarabun New",Sarabun,Arial,sans-serif}@media print{body{margin:0}}</style>');
-  w.document.write('</head><body>'+html+'</body></html>');
-  w.document.close();
-  w.focus();
-  setTimeout(function(){w.print();},300);
-}
 
-// init: เพิ่มแถวจ่ายแรกอัตโนมัติ
-setTimeout(function(){if(document.getElementById('loan_pay_rows')&&document.getElementById('loan_pay_rows').children.length===0)addLoanPay();},100);
+  // พิมพ์ในหน้าเดิม (ไม่เปิดหน้าต่างใหม่) กันปัญหาเบราว์เซอร์มือถือ/แอปในตัวค้าง
+  // ตอนพยายามย้อนกลับมาแก้ไขข้อมูลหลังพิมพ์เสร็จ
+  var box=document.getElementById('gv-preview-loan');
+  if(!box){alert('เกิดข้อผิดพลาด: ไม่พบพื้นที่แสดงใบสำคัญจ่าย');return;}
+  box.innerHTML=html;
+  document.body.classList.add('printing-voucher');
+  var _cleanup=function(){
+    document.body.classList.remove('printing-voucher');
+    box.innerHTML='';
+    window.removeEventListener('afterprint',_cleanup);
+  };
+  window.addEventListener('afterprint',_cleanup);
+  setTimeout(function(){
+    window.print();
+    // เผื่อเบราว์เซอร์ไม่ยิง afterprint (บางเบราว์เซอร์มือถือ/เว็บวิวไม่รองรับ)
+    setTimeout(_cleanup,4000);
+  },50);
+}
 </script>
 </body>
 </html>
