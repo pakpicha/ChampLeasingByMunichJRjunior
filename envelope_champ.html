@@ -249,7 +249,7 @@ body{
 <body>
 
 <div class="wrap">
-  <button class="back-btn" onclick="history.back()">← กลับ</button>
+  <button class="back-btn" onclick="location.href='index.html'">← หน้าหลัก</button>
 
   <!-- ผู้ส่ง -->
   <div class="card">
@@ -513,7 +513,19 @@ function saveAll(){
     localStorage.setItem(LS_KEY,JSON.stringify(d));
   }catch(e){}
 }
+function tryImportFromNotice(){
+  try{
+    var raw=localStorage.getItem('env_recipients_shared');
+    if(!raw)return false;
+    var rcps=JSON.parse(raw);
+    localStorage.removeItem('env_recipients_shared');
+    if(!rcps||!rcps.length)return false;
+    rcps.forEach(function(r){addRcp({name:r.name,addr1:r.addr,zip:r.zip,tel:r.tel});});
+    return true;
+  }catch(e){return false;}
+}
 function restoreAll(){
+  if(tryImportFromNotice())return;
   try{
     var s=localStorage.getItem(LS_KEY);if(!s){addRcp();return;}
     var d=JSON.parse(s);
