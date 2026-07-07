@@ -1691,7 +1691,9 @@ function monthsBetween(d1,d2){
   return m;
 }
 function formatMoney(n){
-  return n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+  // ปัดเศษสตางค์ขึ้นเสมอ (ceiling) แทนการปัดแบบมาตรฐาน
+  var rounded=n<0?-Math.ceil(-n*100)/100:Math.ceil(n*100)/100;
+  return rounded.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
 }
 
 function calcSchedule(principal,annualRate,startDate,months,style){
@@ -1716,9 +1718,10 @@ function calcSchedule(principal,annualRate,startDate,months,style){
     }
   }else{
     // Amortized — ผ่อนเท่ากันทุกงวด
-    const pmt=monthlyRate>0
+    const rawPmt=monthlyRate>0
       ?principal*monthlyRate*Math.pow(1+monthlyRate,months)/(Math.pow(1+monthlyRate,months)-1)
       :principal/months;
+    const pmt=Math.ceil(rawPmt); // ปัดยอดผ่อนต่องวดขึ้นเป็นจำนวนเต็มบาท
     let balance=principal;
     for(let i=1;i<=months;i++){
       const date=addMonths(startDate,i);
