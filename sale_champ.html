@@ -241,7 +241,7 @@ body{
 .warn-title{text-align:center;font-size:18pt;font-weight:bold;margin:1.5cm 0 0.4cm;text-decoration:underline}
 .warn-sub{text-align:center;font-size:15pt;font-weight:bold;margin:0 0 1.2cm;text-decoration:underline}
 .warn-list{font-size:13pt;line-height:1.55;margin:0}
-.warn-item{display:flex;gap:8pt;margin-bottom:0.55cm;align-items:flex-start;text-align:justify}
+.warn-item{display:flex;gap:8pt;margin-bottom:0.55cm;align-items:flex-start;text-align:left}
 .warn-item .wn{flex-shrink:0;width:1cm}
 
 .f-corner{position:absolute;top:0.7cm;left:1cm;font-size:14pt;font-weight:bold}
@@ -427,7 +427,11 @@ function esc(s){s=(s===undefined||s===null)?'':String(s);return s.replace(/&/g,'
 function fmt(n){return (Math.round(n*100)/100).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});}
 function udl(v){
   v=esc(v||'');
-  return '<span style="display:inline-block;min-width:60px;border-bottom:1px dotted #000;padding:0 4px;text-align:center">'+(v||'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;')+'</span>';
+  return '<span style="display:inline-block;min-width:18px;border-bottom:1px dotted #000;padding:0 4px;text-align:center;white-space:nowrap;line-height:1.3;vertical-align:baseline">'+(v||'&nbsp;&nbsp;')+'</span>';
+}
+function optFld(label,v){
+  if(!v)return '';
+  return ' '+esc(label)+'&nbsp;'+udl(v);
 }
 
 /* ---------- ที่อยู่: จังหวัด/อำเภอ/ตำบล แบบเลือกหรือพิมพ์เอง + Bangkok-aware label ---------- */
@@ -769,17 +773,17 @@ function buildDoc(){
   var html='';
   html+='<div style="text-align:center;font-size:20pt;font-weight:bold;letter-spacing:.5px">หนังสือสัญญาจะซื้อจะขายที่ดินและวางมัดจำ</div>';
   html+='<div style="width:120px;border-bottom:2px solid #000;margin:4pt auto 14pt"></div>';
-  html+='<div style="text-align:right;margin-bottom:4pt">สัญญาฉบับนี้ทำที่ '+udl(place)+'</div>';
-  html+='<div style="text-align:right;margin-bottom:12pt">วันที่ '+udl(docDate?docDate.d:'')+' เดือน '+udl(docDate?TH_MONTHS_FULL[docDate.m-1]:'')+' พ.ศ. '+udl(docDate?docDate.y:'')+'</div>';
+  html+='<div style="text-align:right;margin-bottom:4pt">สัญญาฉบับนี้ทำที่&nbsp;'+udl(place)+'</div>';
+  html+='<div style="text-align:right;margin-bottom:12pt">วันที่&nbsp;'+udl(docDate?docDate.d:'')+' เดือน&nbsp;'+udl(docDate?TH_MONTHS_FULL[docDate.m-1]:'')+' พ.ศ.&nbsp;'+udl(docDate?docDate.y:'')+'</div>';
 
-  html+='<div style="text-align:justify;line-height:2.0;text-indent:36pt">';
-  html+='ระหว่างข้าพเจ้า '+udl(sellerName)+' เลขประจำตัวประชาชน '+udl(sp.id)+' อยู่บ้านเลขที่ '+udl(sAddr.no)+' หมู่ที่ '+udl(sAddr.moo)+' ตำบล '+udl(sAddr.tambon)+' อำเภอ '+udl(sAddr.amphoe)+' จังหวัด '+udl(sAddr.province)+' ซึ่งต่อไปในสัญญานี้เรียกว่า "ผู้จะขาย" ฝ่ายหนึ่ง<br>';
-  html+='กับ ข้าพเจ้า '+udl(buyerName)+' เลขประจำตัวประชาชน '+udl(bId)+' อยู่บ้านเลขที่ '+udl(bNo)+' หมู่ที่ '+udl(bMoo)+' ตรอก/ซอย '+udl(bSoi)+' ถนน '+udl(bRoad)+' '+bkkTam+' '+udl(bTambon)+' '+bkkAmp+' '+udl(bAmphoe)+' จังหวัด '+udl(bProvince)+' ซึ่งต่อไปในสัญญานี้เรียกว่า "ผู้จะซื้อ" อีกฝ่ายหนึ่ง<br>';
+  html+='<div style="text-align:left;line-height:2.0;text-indent:36pt">';
+  html+='ระหว่างข้าพเจ้า&nbsp;'+udl(sellerName)+' เลขประจำตัวประชาชน&nbsp;'+udl(sp.id)+' อยู่บ้านเลขที่&nbsp;'+udl(sAddr.no)+optFld('หมู่ที่',sAddr.moo)+' ตำบล&nbsp;'+udl(sAddr.tambon)+' อำเภอ&nbsp;'+udl(sAddr.amphoe)+' จังหวัด&nbsp;'+udl(sAddr.province)+' ซึ่งต่อไปในสัญญานี้เรียกว่า "ผู้จะขาย" ฝ่ายหนึ่ง<br>';
+  html+='กับ ข้าพเจ้า&nbsp;'+udl(buyerName)+' เลขประจำตัวประชาชน&nbsp;'+udl(bId)+' อยู่บ้านเลขที่&nbsp;'+udl(bNo)+optFld('หมู่ที่',bMoo)+optFld('ตรอก/ซอย',bSoi)+optFld('ถนน',bRoad)+' '+bkkTam+'&nbsp;'+udl(bTambon)+' '+bkkAmp+'&nbsp;'+udl(bAmphoe)+' จังหวัด&nbsp;'+udl(bProvince)+' ซึ่งต่อไปในสัญญานี้เรียกว่า "ผู้จะซื้อ" อีกฝ่ายหนึ่ง<br>';
   html+='ทั้งสองฝ่ายได้ตกลงทำสัญญาจะซื้อจะขายกันมีข้อความต่อไปนี้</div>';
 
   // ข้อ 1. รายการหลักทรัพย์ (ที่ดินหนึ่งหรือหลายแปลง)
   var landIds=getLandIds();
-  html+='<div style="text-align:justify;line-height:2.0;margin-top:10pt;text-indent:36pt">ข้อ 1. ผู้จะขายขอรับรองว่าเป็นเจ้าของกรรมสิทธิ์ที่ดินดังต่อไปนี้ โดยปราศจากภาระผูกพันใด ๆ ทั้งสิ้น<br>';
+  html+='<div style="text-align:left;line-height:2.0;margin-top:10pt;text-indent:36pt">ข้อ 1. ผู้จะขายขอรับรองว่าเป็นเจ้าของกรรมสิทธิ์ที่ดินดังต่อไปนี้ โดยปราศจากภาระผูกพันใด ๆ ทั้งสิ้น<br>';
   landIds.forEach(function(n,idx){
     var deedNo=gv('deed_no_'+n), landNo=gv('land_no_'+n);
     var landTambon=gv('land_tambon_'+n), landAmphoe=gv('land_amphoe_'+n), landProvince=gv('land_province_'+n);
@@ -789,22 +793,22 @@ function buildDoc(){
     var hasBuilding=document.getElementById('has_building_'+n)&&document.getElementById('has_building_'+n).checked;
     var buildingType=gv('building_type_'+n), buildingNo=gv('building_no_'+n), buildingMooRoad=gv('building_mooroad_'+n);
 
-    html+=(landIds.length>1?('('+(idx+1)+') '):'')+'โฉนดที่ดินเลขที่ '+udl(deedNo)+' เลขที่ดิน '+udl(landNo)+' '+landBkkTam+' '+udl(landTambon)+' '+landBkkAmp+' '+udl(landAmphoe)+' จังหวัด '+udl(landProvince)+' เป็นจำนวนเนื้อที่ '+udl(rai)+' ไร่ '+udl(ngan)+' งาน '+udl(wa)+' ตารางวา';
+    html+=(landIds.length>1?('('+(idx+1)+') '):'')+'โฉนดที่ดินเลขที่&nbsp;'+udl(deedNo)+' เลขที่ดิน&nbsp;'+udl(landNo)+' '+landBkkTam+'&nbsp;'+udl(landTambon)+' '+landBkkAmp+'&nbsp;'+udl(landAmphoe)+' จังหวัด&nbsp;'+udl(landProvince)+' เป็นจำนวนเนื้อที่&nbsp;'+udl(rai)+' ไร่&nbsp;'+udl(ngan)+' งาน&nbsp;'+udl(wa)+' ตารางวา';
     if(hasBuilding){
-      html+=' พร้อมสิ่งปลูกสร้าง'+(buildingType?(' '+esc(buildingType)):'')+' บ้านเลขที่ '+udl(buildingNo)+' '+udl(buildingMooRoad)+' '+landBkkTam+' '+udl(landTambon)+' '+landBkkAmp+' '+udl(landAmphoe)+' จังหวัด '+udl(landProvince);
+      html+=' พร้อมสิ่งปลูกสร้าง'+(buildingType?(' '+esc(buildingType)):'')+' บ้านเลขที่&nbsp;'+udl(buildingNo)+(buildingMooRoad?('&nbsp;'+udl(buildingMooRoad)):'')+' '+landBkkTam+'&nbsp;'+udl(landTambon)+' '+landBkkAmp+'&nbsp;'+udl(landAmphoe)+' จังหวัด&nbsp;'+udl(landProvince);
     }
     html+='<br>';
   });
   html+='</div>';
 
-  html+='<div style="text-align:justify;line-height:2.0;margin-top:6pt;text-indent:36pt">ข้อ 2. ผู้จะขายตกลงขายที่ดินตามข้อ 1. ให้แก่ผู้จะซื้อในราคา '+udl(fmt(saleAmount))+' บาท</div>';
+  html+='<div style="text-align:left;line-height:2.0;margin-top:6pt;text-indent:36pt">ข้อ 2. ผู้จะขายตกลงขายที่ดินตามข้อ 1. ให้แก่ผู้จะซื้อในราคา&nbsp;'+udl(fmt(saleAmount))+' บาท</div>';
 
-  html+='<div style="text-align:justify;line-height:2.0;margin-top:6pt;text-indent:36pt">ข้อ 3. ในวันทำสัญญาผู้จะขายได้ตกลงราคาที่ดินตามสัญญาในข้อ 2. โดยผู้จะซื้อได้ชำระเงินมัดจำให้แก่ผู้จะขายในวันทำสัญญาเป็นจำนวนเงิน '+udl(fmt(deposit))+' บาท ผู้จะขายได้รับเงินจำนวนดังกล่าวเรียบร้อยแล้วในวันทำสัญญานี้<br>';
-  html+='ส่วนที่เหลืออีกจำนวน '+udl(fmt(remainder))+' บาท จะชำระโดยมีรายละเอียดดังนี้</div>';
+  html+='<div style="text-align:left;line-height:2.0;margin-top:6pt;text-indent:36pt">ข้อ 3. ในวันทำสัญญาผู้จะขายได้ตกลงราคาที่ดินตามสัญญาในข้อ 2. โดยผู้จะซื้อได้ชำระเงินมัดจำให้แก่ผู้จะขายในวันทำสัญญาเป็นจำนวนเงิน&nbsp;'+udl(fmt(deposit))+' บาท ผู้จะขายได้รับเงินจำนวนดังกล่าวเรียบร้อยแล้วในวันทำสัญญานี้<br>';
+  html+='ส่วนที่เหลืออีกจำนวน&nbsp;'+udl(fmt(remainder))+' บาท จะชำระโดยมีรายละเอียดดังนี้</div>';
 
   // ตารางผ่อนใน buildDoc — ตารางทางการ ชิดซ้าย
   if(actual){
-    html+='<table style="border-collapse:collapse;width:55%;margin:10pt 0 10pt 20pt;font-size:12.5pt">';
+    html+='<table style="border-collapse:collapse;width:55%;margin:10pt auto;font-size:12.5pt">';
     html+='<thead><tr>'
       +'<th style="border:1px solid #000;padding:4pt 8pt;background:#f0ece0">วันที่ต้องชำระ</th>'
       +'<th style="border:1px solid #000;padding:4pt 8pt;background:#f0ece0">จำนวนเงิน (บาท)</th>'
@@ -821,13 +825,13 @@ function buildDoc(){
   }else{
     html+='<div style="margin:8pt 0 8pt 20pt">(กรุณากรอกวันทำสัญญาจริงเพื่อคำนวณวันครบกำหนดแต่ละงวด)</div>';
   }
-  html+='<div style="text-align:justify;line-height:2.0">และผู้จะขายจะทำการจดทะเบียนโอนกรรมสิทธิ์แก่ผู้จะซื้อเมื่อรับชำระค่าที่ดินเรียบร้อยแล้ว</div>';
+  html+='<div style="text-align:left;line-height:2.0">และผู้จะขายจะทำการจดทะเบียนโอนกรรมสิทธิ์แก่ผู้จะซื้อเมื่อรับชำระค่าที่ดินเรียบร้อยแล้ว</div>';
 
-  html+='<div style="text-align:justify;line-height:2.0;margin-top:6pt;text-indent:36pt">ข้อ 4. ผู้จะขายยินยอมให้ผู้จะซื้อเข้าทำประโยชน์ ปรับปรุงที่ดิน และปลูกสร้างอาคาร หรือการใด ๆ บนที่ดินได้ ในระหว่างยังชำระค่าที่ดินไม่ครบ ผู้จะซื้อห้ามขุดสระ ขุดลอกหน้าดิน หรือทำการอันใดที่ทำให้ที่ดินของผู้จะขายเสียหาย</div>';
+  html+='<div style="text-align:left;line-height:2.0;margin-top:6pt;text-indent:36pt">ข้อ 4. ผู้จะขายยินยอมให้ผู้จะซื้อเข้าทำประโยชน์ ปรับปรุงที่ดิน และปลูกสร้างอาคาร หรือการใด ๆ บนที่ดินได้ ในระหว่างยังชำระค่าที่ดินไม่ครบ ผู้จะซื้อห้ามขุดสระ ขุดลอกหน้าดิน หรือทำการอันใดที่ทำให้ที่ดินของผู้จะขายเสียหาย</div>';
 
-  html+='<div style="text-align:justify;line-height:2.0;margin-top:6pt;text-indent:36pt">ข้อ 5. ในกรณีที่ผู้จะซื้อจัดการให้มีการโอนสิทธิ์ที่ดินให้กับบุคคลภายนอก โดยผู้จะขายยอมไปจดทะเบียนการโอนกรรมสิทธิ์ที่ดินตามรายละเอียดข้างต้น ค่าธรรมเนียมการโอน ค่าใช้จ่ายในการจดทะเบียนแบ่งแยก ค่าอากรและภาษีค่าใช้จ่ายต่าง ๆ ในการจดทะเบียนกรรมสิทธิ์ที่ดินตามสัญญานี้ ผู้จะซื้อเป็นผู้ออก</div>';
+  html+='<div style="text-align:left;line-height:2.0;margin-top:6pt;text-indent:36pt">ข้อ 5. ในกรณีที่ผู้จะซื้อจัดการให้มีการโอนสิทธิ์ที่ดินให้กับบุคคลภายนอก โดยผู้จะขายยอมไปจดทะเบียนการโอนกรรมสิทธิ์ที่ดินตามรายละเอียดข้างต้น ค่าธรรมเนียมการโอน ค่าใช้จ่ายในการจดทะเบียนแบ่งแยก ค่าอากรและภาษีค่าใช้จ่ายต่าง ๆ ในการจดทะเบียนกรรมสิทธิ์ที่ดินตามสัญญานี้ ผู้จะซื้อเป็นผู้ออก</div>';
 
-  html+='<div style="text-align:justify;line-height:2.0;margin-top:10pt;text-indent:36pt">สัญญานี้ทำขึ้นเป็นสองฉบับ มีข้อความถูกต้องตรงกัน ทั้งสองฝ่ายต่างได้อ่านและเข้าใจข้อความโดยตลอดดีแล้ว เห็นว่าถูกต้องตามเจตนา เพื่อเป็นหลักฐานผู้จะขายและผู้จะซื้อได้ลงลายมือชื่อไว้เป็นสำคัญต่อหน้าพยาน</div>';
+  html+='<div style="text-align:left;line-height:2.0;margin-top:10pt;text-indent:36pt">สัญญานี้ทำขึ้นเป็นสองฉบับ มีข้อความถูกต้องตรงกัน ทั้งสองฝ่ายต่างได้อ่านและเข้าใจข้อความโดยตลอดดีแล้ว เห็นว่าถูกต้องตามเจตนา เพื่อเป็นหลักฐานผู้จะขายและผู้จะซื้อได้ลงลายมือชื่อไว้เป็นสำคัญต่อหน้าพยาน</div>';
 
   function sigCell(role,name){
     return '<div style="flex:1;text-align:center">'
@@ -853,6 +857,7 @@ function genDoc(){
   var editBtn=document.getElementById('editDocBtn');
   if(editBtn)editBtn.textContent='✏️ แก้ไขก่อนพิมพ์';
   applyDocFontSize();
+  addPageFooters();
   document.getElementById('form-wrap').style.display='none';
   document.getElementById('doc-wrap').style.display='block';
 }
@@ -871,6 +876,7 @@ function toggleDocEdit(){
     el.classList.remove('editing');
     el.style.outline='';
     btn.textContent='✏️ แก้ไขก่อนพิมพ์';
+    addPageFooters();
   }else{
     el.setAttribute('contenteditable','true');
     el.classList.add('editing');
@@ -892,9 +898,30 @@ function applyDocFontSize(){
 }
 function adjustDocFont(delta){
   if(delta===0){_docFontPct=100;}
-  else{_docFontPct+=delta*10;if(_docFontPct<50)_docFontPct=50;if(_docFontPct>200)_docFontPct=200;}
+  else{_docFontPct+=delta*5;if(_docFontPct<50)_docFontPct=50;if(_docFontPct>200)_docFontPct=200;}
   applyDocFontSize();
+  addPageFooters();
 }
+
+/* ---------- เลขหน้า (1/2, 2/2 ...) มุมล่างขวาแต่ละหน้า ---------- */
+var PAGE_HEIGHT_PX=29.7*37.795; // A4 สูง 29.7cm ที่ 96dpi
+function addPageFooters(){
+  var el=document.getElementById('doc-content');
+  if(!el)return;
+  el.querySelectorAll('.page-footer').forEach(function(f){f.remove();});
+  el.style.position='relative';
+  var totalH=el.scrollHeight;
+  var totalPages=Math.max(1,Math.ceil(totalH/PAGE_HEIGHT_PX));
+  for(var i=1;i<=totalPages;i++){
+    var f=document.createElement('div');
+    f.className='page-footer';
+    f.setAttribute('contenteditable','false');
+    f.style.cssText='position:absolute;top:'+(PAGE_HEIGHT_PX*i-34)+'px;right:8px;font-size:10.5pt;color:#333;user-select:none';
+    f.textContent=i+'/'+totalPages;
+    el.appendChild(f);
+  }
+}
+window.addEventListener('beforeprint',addPageFooters);
 
 /* ---------- ส่งออกเป็น Word (.doc) ---------- */
 function exportWord(){
@@ -902,7 +929,9 @@ function exportWord(){
   if(!el||!el.innerHTML.trim()){alert('กรุณาสร้างเอกสารสัญญาก่อน');return;}
   var buyerName=(gv('b_first')||gv('b_last'))?(gv('b_first')+gv('b_last')):'เอกสาร';
   var fname='สัญญาจะซื้อจะขาย_'+buyerName.replace(/\s+/g,'')+'.doc';
-  var bodyHtml=el.innerHTML;
+  var clone=el.cloneNode(true);
+  clone.querySelectorAll('.page-footer').forEach(function(f){f.remove();});
+  var bodyHtml=clone.innerHTML;
   var css='body{font-family:"TH Sarabun New","Sarabun",Arial,sans-serif;font-size:16pt;line-height:1.5;color:#000}';
   var html='<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">'
     +'<head><meta charset="UTF-8"><title>สัญญาจะซื้อจะขาย</title>'

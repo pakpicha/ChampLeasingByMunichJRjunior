@@ -597,7 +597,7 @@ function _autoFillZipFromAddr(addrEl,zipId){
       </div>
     </div>
     <div id="recv-custom-section">
-    <div class="fg"><label>ชื่อ-นามสกุล ผู้รับเงิน</label><input type="text" id="gv_recv_name" placeholder="ชื่อ-นามสกุล"></div>
+    <div class="fg"><label>ผู้รับเงินคนที่ 1 (ชื่อ-นามสกุล)</label><input type="text" id="gv_recv_name" placeholder="ชื่อ-นามสกุล"></div>
     <div class="fg"><label>บ้านเลขที่ / ถนน / หมู่</label><input type="text" id="gv_recv_addr1" placeholder="เช่น 89/28 หมู่ 9..."></div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
       <div class="fg"><label>จังหวัด</label><input type="text" id="gv_recv_prov" placeholder="จังหวัด..." style="width:100%;padding:10px 11px;font-size:15px;border:1px solid #ccc;border-radius:8px;font-family:inherit;background:#fafaf7;box-sizing:border-box"></div>
@@ -609,6 +609,11 @@ function _autoFillZipFromAddr(addrEl,zipId){
     </div>
     <input type="hidden" id="gv_recv_addr">
     </div>
+    <div class="fg" style="margin-top:10px">
+      <label>ผู้รับเงินคนที่ 2 เป็นต้นไป (ถ้ามี — จะมีช่องเซ็นให้ครบทุกคน)</label>
+    </div>
+    <div id="recv-extra-wrap"></div>
+    <button class="add-btn" onclick="addExtraRecv()">+ เพิ่มผู้รับเงิน</button>
   </div>
 
   <!-- 3. รายการจ่าย -->
@@ -729,6 +734,58 @@ function onDirSelect(v){
   else if(ZIP_DATA[pv]&&ZIP_DATA[pv][ap])zp=ZIP_DATA[pv][ap];
   var fds={'gv_recv_addr1':a1,'gv_recv_prov':pv,'gv_recv_amp':ap,'gv_recv_tam':tm,'gv_recv_zip':zp};
   Object.keys(fds).forEach(function(id){var el=document.getElementById(id);if(!el)return;el.value=fds[id];el.readOnly=true;el.style.background='#eef5ee';el.style.cursor='not-allowed';});
+}
+
+/* ---------- ผู้รับเงินร่วม (ลงชื่อหลายคน) ---------- */
+var extraRecvC=0;
+function addExtraRecv(){
+  extraRecvC++;
+  var i=extraRecvC;
+  var wrap=document.getElementById('recv-extra-wrap');
+  var div=document.createElement('div');
+  div.id='extrarecv-'+i;
+  div.style.cssText='background:rgba(232,239,233,.4);border:1px solid #e2d9c5;border-radius:8px;padding:10px;margin-bottom:10px;position:relative';
+  var IS='padding:10px 11px;font-size:15px;border:1px solid #ccc;border-radius:8px;font-family:inherit;background:#fafaf7;box-sizing:border-box;width:100%';
+  div.innerHTML=
+    '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">'
+    +'<div class="extra-recv-label" style="font-weight:600;color:#0f2e21;font-size:14px"></div>'
+    +'<button type="button" onclick="removeExtraRecv('+i+')" style="background:#fee;color:#c00;border:1px solid #fcc;border-radius:8px;padding:6px 12px;cursor:pointer;font-family:inherit">× ลบ</button>'
+    +'</div>'
+    +'<div class="fg"><label>ชื่อ-นามสกุล</label><input type="text" id="extra_recv_name_'+i+'" placeholder="ชื่อ-นามสกุล" style="'+IS+'"></div>'
+    +'<div class="fg"><label>บ้านเลขที่ / ถนน / หมู่</label><input type="text" id="extra_recv_addr1_'+i+'" placeholder="เช่น 89/28 หมู่ 9..." style="'+IS+'"></div>'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">'
+    +'<div class="fg"><label>จังหวัด</label><input type="text" id="extra_recv_prov_'+i+'" placeholder="จังหวัด..." style="'+IS+'"></div>'
+    +'<div class="fg"><label>อำเภอ/เขต</label><input type="text" id="extra_recv_amp_'+i+'" placeholder="อำเภอ/เขต..." style="'+IS+'"></div>'
+    +'</div>'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">'
+    +'<div class="fg"><label>ตำบล/แขวง</label><input type="text" id="extra_recv_tam_'+i+'" placeholder="ตำบล/แขวง..." style="'+IS+'"></div>'
+    +'<div class="fg"><label>รหัสไปรษณีย์</label><input type="text" id="extra_recv_zip_'+i+'" placeholder="เช่น 30190" maxlength="5" style="'+IS+'"></div>'
+    +'</div>';
+  wrap.appendChild(div);
+  renumberExtraRecv();
+}
+function removeExtraRecv(i){
+  var el=document.getElementById('extrarecv-'+i);
+  if(el)el.remove();
+  renumberExtraRecv();
+}
+function renumberExtraRecv(){
+  document.querySelectorAll('#recv-extra-wrap > div').forEach(function(row,idx){
+    var lbl=row.querySelector('.extra-recv-label');
+    if(lbl)lbl.textContent='ผู้รับเงินคนที่ '+(idx+2);
+  });
+}
+function getExtraRecvData(){
+  var out=[];
+  document.querySelectorAll('#recv-extra-wrap > div').forEach(function(row){
+    var g=function(suf){var el=row.querySelector('input[id^="extra_recv_'+suf+'_"]');return el?el.value.trim():'';};
+    var name=g('name');
+    if(!name)return;
+    var a1=g('addr1'),pv=g('prov'),ap=g('amp'),tm=g('tam');
+    var addr=[a1,tm?'ต.'+tm:'',ap?'อ.'+ap:'',pv?'จ.'+pv:''].filter(Boolean).join(' ');
+    out.push({name:name,addr:addr});
+  });
+  return out;
 }
 
 var PAY_TYPE_LABELS={
@@ -943,6 +1000,11 @@ function genGvVoucher(){
   var no=billNo(date,seq,payerName);
   var recvName=gv('gv_recv_name')||'..........';
   var recvAddr=_getRecvAddr()||'';
+  var recvExtra=getExtraRecvData();
+  var allRecvNames=[recvName].concat(recvExtra.map(function(p){return p.name;}));
+  var recvNamesDisplay=allRecvNames.join(', ');
+  var allRecvAddrs=[recvAddr].concat(recvExtra.map(function(p){return p.addr;})).filter(function(a){return a;});
+  var recvAddrDisplay=allRecvAddrs.join(', ');
   
   var totalGross=0,totalWht=0;
   rows.forEach(function(r){totalGross+=r.amt;totalWht+=r.whtAmt;});
@@ -1012,9 +1074,9 @@ function genGvVoucher(){
       // ชื่อ/ที่อยู่ผู้รับ
       +'<table style="width:100%;border-collapse:collapse;margin-bottom:6pt">'
       +'<tr><td style="border:1px solid #999;border-bottom:none;'+CELL+'font-weight:bold;width:25%">ชื่อ-นามสกุล ผู้รับเงิน</td>'
-      +'<td style="border:1px solid #999;border-left:none;border-bottom:none;'+CELL+'">'+recvName+'</td></tr>'
+      +'<td style="border:1px solid #999;border-left:none;border-bottom:none;'+CELL+'">'+recvNamesDisplay+'</td></tr>'
       +'<tr><td style="border:1px solid #999;border-top:none;'+CELL+'font-weight:bold">ที่อยู่</td>'
-      +'<td style="border:1px solid #999;border-left:none;border-top:none;'+CELL+'word-break:break-word">'+recvAddr+'</td></tr>'
+      +'<td style="border:1px solid #999;border-left:none;border-top:none;'+CELL+'word-break:break-word">'+recvAddrDisplay+'</td></tr>'
       +'</table>'
       // รายการ
       +'<table style="width:100%;border-collapse:collapse;margin-bottom:4pt">'
@@ -1028,16 +1090,19 @@ function genGvVoucher(){
       +'</div>'
       // เซ็น (child 2 ของ flex — ติดขอบล่าง)
       +'<div>'
-      +'<table style="width:100%;border-collapse:collapse"><tr>'
-      +'<td style="text-align:center;vertical-align:bottom;width:50%;padding:0 4px 2mm">'
-      +'<div style="border-top:1px solid #000;width:140px;margin:0 auto 2pt"></div>'
-      +'<div style="font-size:13pt;font-weight:600;line-height:1.1">ผู้จ่ายเงิน</div>'
-      +'<div style="font-size:12pt;line-height:1.1;margin-top:0pt">( '+displayName+' )</div></td>'
-      +'<td style="text-align:center;vertical-align:bottom;width:50%;padding:0 4px 2mm">'
-      +'<div style="border-top:1px solid #000;width:140px;margin:0 auto 2pt"></div>'
-      +'<div style="font-size:13pt;font-weight:600;line-height:1.1">ผู้รับเงิน</div>'
-      +'<div style="font-size:12pt;line-height:1.1;margin-top:0pt">( '+recvName+' )</div></td>'
-      +'</tr></table>'
+      +(function(){
+        var sigCols=[{role:'ผู้จ่ายเงิน',name:displayName}];
+        allRecvNames.forEach(function(nm){sigCols.push({role:'ผู้รับเงิน',name:nm});});
+        var perRow=sigCols.length<=4?sigCols.length:Math.ceil(sigCols.length/Math.ceil(sigCols.length/4));
+        var w=(100/perRow).toFixed(2)+'%';
+        var cellsHTML=sigCols.map(function(c){
+          return '<div style="text-align:center;width:'+w+';box-sizing:border-box;padding:0 4px 6pt">'
+            +'<div style="border-top:1px solid #000;width:90%;max-width:140px;margin:0 auto 2pt"></div>'
+            +'<div style="font-size:13pt;font-weight:600;line-height:1.1">'+c.role+'</div>'
+            +'<div style="font-size:11pt;line-height:1.1;margin-top:0pt">( '+c.name+' )</div></div>';
+        }).join('');
+        return '<div style="display:flex;flex-wrap:wrap;align-items:flex-end">'+cellsHTML+'</div>';
+      })()
       +'</div>'
       +'</div>';
   }
@@ -1062,7 +1127,7 @@ addGvPay();
 // auto-save
 var LS_KEY='form_data_ใบสำคัญจ่ายทั่วไป';
 function autoSave(){try{var d={};document.querySelectorAll('input[id],select[id]').forEach(function(e){d[e.id]=e.value;});localStorage.setItem(LS_KEY,JSON.stringify(d));}catch(e){}}
-function autoRestore(){try{var s=localStorage.getItem(LS_KEY);if(!s)return;var d=JSON.parse(s);Object.keys(d).forEach(function(k){var e=document.getElementById(k);if(e)e.value=d[k];});}catch(e){}}
+function autoRestore(){try{var s=localStorage.getItem(LS_KEY);if(!s)return;var d=JSON.parse(s);var extraCount=0;Object.keys(d).forEach(function(k){var m=k.match(/^extra_recv_name_(\d+)$/);if(m)extraCount=Math.max(extraCount,parseInt(m[1],10));});for(var i=0;i<extraCount;i++){addExtraRecv();}Object.keys(d).forEach(function(k){var e=document.getElementById(k);if(e)e.value=d[k];});}catch(e){}}
 setInterval(autoSave,2000);
 window.addEventListener('beforeunload',autoSave);
 setTimeout(autoRestore,100);
