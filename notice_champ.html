@@ -661,7 +661,7 @@ function _embRcptPage(page,data){
 }
 function _embSplitAddr(rcp){
   var addr=(rcp.addr||'').trim();
-  var i=addr.indexOf('ต.');
+  var i=addr.indexOf('ต.');if(i<0)i=addr.indexOf('แขวง');
   if(i>0)return{ra1:addr.slice(0,i).trim(),ra2:addr.slice(i).trim()};
   if(addr.length>40){var mid=addr.lastIndexOf(' ',addr.length/2);if(mid>0)return{ra1:addr.slice(0,mid),ra2:addr.slice(mid+1)};}
   return{ra1:addr,ra2:''};
@@ -753,7 +753,7 @@ function getDebtors(){
                  var tm=(document.getElementById('db_tam_'+n)||{value:''}).value.trim();
                  var ap=(document.getElementById('db_amp_'+n)||{value:''}).value.trim();
                  var pv=(document.getElementById('db_prov_'+n)||{value:''}).value.trim();
-                 return [a1,tm?'ต.'+tm:'',ap?'อ.'+ap:'',pv?'จ.'+pv:''].filter(Boolean).join(' ');
+                 var _bkk=(pv==='กรุงเทพมหานคร');return [a1,tm?(_bkk?'แขวง':'ต.')+tm:'',ap?(_bkk?'เขต':'อ.')+ap:'',pv?(_bkk?pv:'จ.'+pv):''].filter(Boolean).join(' ');
                })(),
                zip:(document.getElementById('db_zip_'+n)||{value:''}).value.trim(),
                tel:(document.getElementById('db_tel_'+n)||{value:''}).value.trim()});
@@ -971,7 +971,7 @@ function buildDoc(){
   var landText='';
   var landRef='';
   if(landChanote||landNo||landTambon){
-    landRef=landDocType+' เลขที่ '+landChanote+(landNo?' เลขที่ดิน '+landNo:'')+' ตำบล '+landTambon+' อำเภอ '+landAmphoe+' จังหวัด '+landProvince;
+    var _bkkL=(landProvince==='กรุงเทพมหานคร');landRef=landDocType+' เลขที่ '+landChanote+(landNo?' เลขที่ดิน '+landNo:'')+' '+(_bkkL?'แขวง':'ตำบล')+' '+landTambon+' '+(_bkkL?'เขต':'อำเภอ')+' '+landAmphoe+' จังหวัด '+landProvince;
     landText=landRef+(hasBuilding?' พร้อมสิ่งปลูกสร้าง ซึ่งเป็นกรรมสิทธิ์ของท่าน':' ซึ่งเป็นกรรมสิทธิ์ของท่าน');
   }
 
